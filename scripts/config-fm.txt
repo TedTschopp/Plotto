@@ -1,0 +1,16 @@
+### Configuration file for A=female, B=male version of Plotto
+
+# Target output file.
+output_file=../plotto-fm.html
+
+# List of js files to include, separated by ','s with no extra spaces.
+javascript=random.js
+
+# List of CSS files to include, separated by ','s with no extra spaces.
+css=plotto.css
+
+# True to swap the default gender assumptions for A and B.
+gender_swap=True
+
+# True to automatically include Bootstrap CSS and JS files.
+include_bootstrap=True
