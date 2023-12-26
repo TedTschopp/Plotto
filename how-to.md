@@ -72,4 +72,4 @@ In addition, various other characters are given abbreviations based on their rel
 * BR-B, brother of B
 * SR-B, sister of B
 
-A full list of these abbreviations can be found in the [The Plotto Character Symbols](https://garykac.github.io/plotto/plotto-mf.html#character-symbols).
+A full list of these abbreviations can be found in the [The Plotto Character Symbols](/plotto-mf.html#character-symbols).
