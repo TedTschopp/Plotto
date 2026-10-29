@@ -6,6 +6,8 @@ Plotto is a static writing tool based on William Wallace Cook’s *Plotto: A New
 
 Choose a theme and character-role edition, then generate an outline. Each outline includes a protagonist/action/outcome framework, a main conflict, and linked lead-up and carry-on suggestions. Replace a stage, choose a linked alternative, search for a conflict, name the cast, copy or download an outline, or share a link that restores it exactly.
 
+The current story saves automatically in this browser whenever you generate an outline, replace a suggestion, change editions, or edit names. Return to the app to resume the same masterplot, main conflict, lead-up, carry-on, edition, names, and generator settings, including after restarting the browser. Generating another outline replaces the saved story. Opening a shared link shows its story without replacing your saved work until you make a change. Unreadable or outdated saved stories fall back to a new outline; unavailable storage leaves the app usable and offers a shared link as a way to keep the story.
+
 ## The story rules
 
 - Masterplots combine one of 15 A clauses, 62 B clauses, and 15 C clauses. Clause letters describe story structure; character symbols A and B describe people.
@@ -33,7 +35,7 @@ python3 -m http.server 8765 --bind 127.0.0.1
 
 Open [the local preview](http://127.0.0.1:8765/). Use HTTP because the generator fetches its dataset. The linked book editions also work without JavaScript. `npm run build`, `npm test`, `npm run verify`, and `npm run dev` are shortcuts for the corresponding commands.
 
-For optional browser checks, install Playwright separately and run `node tests/browser.mjs`, `node tests/cast-browser.mjs`, and `node tests/names-browser.mjs` against the local server. The saved-name checks use a temporary browser profile and verify persistence after a full browser restart. `PLAYWRIGHT_MODULE` can point to an existing Playwright module; `PLOTTO_URL` selects another server. Browser screenshots go into the ignored `test-results/` directory.
+For optional browser checks, install Playwright separately and run `node tests/browser.mjs`, `node tests/cast-browser.mjs`, `node tests/names-browser.mjs`, and `node tests/story-browser.mjs` against the local server. The saved-name and current-story checks use temporary browser profiles and verify persistence after a full browser restart. `PLAYWRIGHT_MODULE` can point to an existing Playwright module; `PLOTTO_URL` selects another server. Browser screenshots go into the ignored `test-results/` directory.
 
 ## Source and build
 
@@ -48,6 +50,7 @@ For optional browser checks, install Playwright separately and run `node tests/b
 | `js/engine.js` | Pure selection, section extraction, character adaptation and export rules. |
 | `js/app.js` | Accessible controls, search, rendering, shared links and clipboard/download handling. |
 | `js/name-storage.js` | Browser-local character name persistence and recovery when storage is unavailable. |
+| `js/story-storage.js` | Current story and generator settings saved in this browser for the next visit. |
 | `index.html`, `css/app.css` | Generator interface, responsive layout, light/dark appearance and print styles. |
 | `plotto-mf.html`, `plotto-fm.html` | Generated readers. Native contents and edition links work without JavaScript. |
 | `how-to.html` | Illustrated guide to the app and original method. |
@@ -63,7 +66,7 @@ The [reference correction ledger](https://plotto.tedt.org/corrections.html) reco
 
 GitHub Actions rebuilds and verifies the source, runs Python and JavaScript tests, checks that generated files are committed, and publishes through the existing Jekyll/GitHub Pages workflow. `CNAME` retains `plotto.tedt.org`. Build tools and tests are excluded from the published Jekyll output.
 
-The app runs entirely in the browser. Google Fonts supplies typography; the collection itself is served from this repository. The generator makes no external generation requests and keeps character names in this browser’s local storage and the optional shared link. Saved names stay in the browser where they were entered; clearing site data removes them.
+The app runs entirely in the browser. Google Fonts supplies typography; the collection itself is served from this repository. The generator makes no external generation requests and keeps the current story and character names in this browser’s local storage and the optional shared link. Saved work stays in this browser; clearing site data removes it.
 
 ## Shared TedT.org navigation
 

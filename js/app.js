@@ -1,11 +1,13 @@
 import {generateOutline, renderOutline, cleanText, namedText, namedNote, outlineText,
   outlineCharacters, characterRole, nameKey, sharedState, MAX_SHARED_HASH_LENGTH} from './engine.js';
 import {loadCharacterNames, saveCharacterNames} from './name-storage.js';
+import {loadCurrentStory, saveCurrentStory} from './story-storage.js';
 
 const $ = (id) => document.getElementById(id);
 const cache = new Map();
 let book, outline, loading = 0, visibleResults = 12;
 let rememberedNames = {a: '', b: ''}, namesLoaded = false, nameStorageAvailable = true;
+let pendingRestore = null, storySaveMessage = '';
 
 function element(tag, text, className) {
   const node = document.createElement(tag);
@@ -177,7 +179,7 @@ function renderSupportingCast(characters) {
   }
 }
 
-function render({updateCast = true} = {}) {
+function render({updateCast = true, persist = true} = {}) {
   const content = $('outline-content');
   content.replaceChildren();
   const master = element('div', undefined, 'masterplot');
@@ -209,6 +211,15 @@ function render({updateCast = true} = {}) {
   if (updateCast) renderSupportingCast(detected);
   renderNameMemory();
   $('reader-link').href = `plotto-${book.edition}.html`;
+  if (persist) {
+    const saved = saveCurrentStory(book, outline.state, currentOptions());
+    storySaveMessage = saved ? 'Your current story is saved automatically in this browser for your next visit.'
+      : 'This browser could not save your story. Copy a link to keep this outline.';
+    pendingRestore = null;
+    $('retry').hidden = true;
+  }
+  $('story-memory-note').hidden = false;
+  if ($('story-memory-note').textContent !== storySaveMessage) $('story-memory-note').textContent = storySaveMessage;
 }
 
 function generate(overrides = {}) {
@@ -307,8 +318,21 @@ async function copy(text, message) {
   }
 }
 
-async function loadEdition(edition, savedState) {
+function restoreControls(restore) {
+  const controls = restore.controls ?? {group: '', b: '', a: String(restore.state.a),
+    c: String(restore.state.c), main: restore.state.main};
+  $('theme').value = controls.group;
+  updateActions();
+  for (const [id, key] of [['action', 'b'], ['protagonist', 'a'], ['ending', 'c'], ['start-conflict', 'main']]) {
+    $(id).value = controls[key];
+  }
+  $('name-a').value = restore.state.names.a;
+  $('name-b').value = restore.state.names.b;
+}
+
+async function loadEdition(edition, restore = null) {
   const request = ++loading;
+  pendingRestore = restore;
   clearError();
   $('edition').value = edition;
   $('generator-fields').disabled = true;
@@ -354,12 +378,24 @@ async function loadEdition(edition, savedState) {
     $('outline-content').inert = false;
     $('supporting-cast').inert = false;
     $('search-results').inert = false;
-    if (savedState) {
-      outline = renderOutline(book, savedState);
-      $('name-a').value = savedState.names.a;
-      $('name-b').value = savedState.names.b;
-      render();
-      status(`Shared outline restored from conflict ${savedState.main}.`);
+    if (restore) {
+      let restored;
+      try { restored = renderOutline(book, restore.state); }
+      catch (error) {
+        if (restore.kind === 'shared') throw error;
+        generate();
+        status('Your saved story could not be restored with this collection. A new outline is shown, using your saved character names.');
+      }
+      if (restored) {
+        outline = restored;
+        restoreControls(restore);
+        storySaveMessage = restore.kind === 'shared'
+          ? 'This shared story will be saved in this browser when you make a change.'
+          : 'Your current story is saved automatically in this browser for your next visit.';
+        render({persist: false});
+        status(`${restore.kind === 'shared' ? 'Shared outline' : 'Your last story'} restored from conflict ${restore.state.main}.`);
+        pendingRestore = null;
+      }
     } else if (outline) {
       const state = {...outline.state, edition, hash: book.sourceHash};
       outline = renderOutline(book, state);
@@ -385,7 +421,7 @@ async function loadEdition(edition, savedState) {
 $('generator-form').addEventListener('submit', (event) => { event.preventDefault(); generate(); });
 $('theme').addEventListener('change', updateActions);
 $('edition').addEventListener('change', () => loadEdition($('edition').value));
-$('retry').addEventListener('click', () => loadEdition($('edition').value));
+$('retry').addEventListener('click', () => loadEdition($('edition').value, pendingRestore));
 $('clear-names').addEventListener('click', clearNames);
 for (const key of ['a', 'b']) $('name-' + key).addEventListener('input', () => {
   updateName(key, $('name-' + key).value);
@@ -415,16 +451,19 @@ $('download-outline').addEventListener('click', () => {
   status('Outline downloaded as a text file.');
 });
 
-let shared;
+let restore, sharedError;
 try {
   if (location.hash.startsWith('#outline=')) {
     if (location.hash.length > MAX_SHARED_HASH_LENGTH) throw new Error('This shared outline is too large. Generate a new outline.');
-    shared = JSON.parse(decodeURIComponent(location.hash.slice(9)));
+    const shared = JSON.parse(decodeURIComponent(location.hash.slice(9)));
     if (!['mf', 'fm'].includes(shared?.edition)) throw new Error('This shared outline has an invalid edition.');
+    restore = {state: shared, kind: 'shared'};
   }
 } catch (error) {
-  shared = undefined;
-  await loadEdition('mf');
-  showError(new Error(`The shared outline could not be opened. ${error.message}`));
+  sharedError = new Error(`The shared outline could not be opened. ${error.message}`);
 }
-if (!book) await loadEdition(shared?.edition || 'mf', shared);
+const savedStory = restore ? null : loadCurrentStory();
+if (savedStory?.snapshot) restore = {...savedStory.snapshot, kind: 'saved'};
+await loadEdition(restore?.state.edition || 'mf', restore);
+if (savedStory?.invalid && outline) status('The saved story could not be read. A new outline is shown, using your saved character names.');
+if (sharedError) showError(sharedError);
