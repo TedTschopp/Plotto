@@ -13,6 +13,7 @@ Choose a theme and character-role edition, then generate an outline. Each outlin
 - Lead-ups and carry-ons follow that main variant’s actual references. Semicolons retain their sequence; `or` and comma-separated variant letters offer alternatives.
 - Star limits and numbered options select the requested section. Character changes are simultaneous within a change group; transpositions swap both symbols. Added-character instructions remain visible writing notes.
 - Names replace complete character symbols in displayed and exported text. A and B have name fields in the options. The app scans the adapted outline and offers optional fields under “Name the supporting cast” for symbols such as A-3 and F-B, with their roles. Blank fields leave the symbols intact. Names stay with their symbols through new suggestions, regeneration, and edition changes; shared links include the names used in that outline.
+- Entered names are saved automatically in this browser and restored on future visits, including supporting symbols that do not appear in the current outline. Clear an individual field to forget that name, or use “Clear saved names” in the name options to remove the whole cast. Shared links restore their own names without overwriting your saved cast. If browser storage is unavailable, names still work for the current visit.
 - A C clause supplies a writing direction. Linked situations may need further development to reach that outcome. Adapt pronouns, relationships, motives and setting as needed.
 - Shared links contain the selected edition, source revision, masterplot clauses, main variant, linked choices, and any names entered. They use no server-side storage. Links to an older source revision report the mismatch and allow a new outline.
 
@@ -32,7 +33,7 @@ python3 -m http.server 8765 --bind 127.0.0.1
 
 Open [the local preview](http://127.0.0.1:8765/). Use HTTP because the generator fetches its dataset. The linked book editions also work without JavaScript. `npm run build`, `npm test`, `npm run verify`, and `npm run dev` are shortcuts for the corresponding commands.
 
-For optional browser checks, install Playwright separately and run `node tests/browser.mjs` and `node tests/cast-browser.mjs` against the local server. `PLAYWRIGHT_MODULE` can point to an existing Playwright module; `PLOTTO_URL` selects another server. Browser screenshots go into the ignored `test-results/` directory.
+For optional browser checks, install Playwright separately and run `node tests/browser.mjs`, `node tests/cast-browser.mjs`, and `node tests/names-browser.mjs` against the local server. The saved-name checks use a temporary browser profile and verify persistence after a full browser restart. `PLAYWRIGHT_MODULE` can point to an existing Playwright module; `PLOTTO_URL` selects another server. Browser screenshots go into the ignored `test-results/` directory.
 
 ## Source and build
 
@@ -46,6 +47,7 @@ For optional browser checks, install Playwright separately and run `node tests/b
 | `data/plotto-mf.json`, `data/plotto-fm.json` | Generated browser datasets. Rebuild these rather than editing them. |
 | `js/engine.js` | Pure selection, section extraction, character adaptation and export rules. |
 | `js/app.js` | Accessible controls, search, rendering, shared links and clipboard/download handling. |
+| `js/name-storage.js` | Browser-local character name persistence and recovery when storage is unavailable. |
 | `index.html`, `css/app.css` | Generator interface, responsive layout, light/dark appearance and print styles. |
 | `plotto-mf.html`, `plotto-fm.html` | Generated readers. Native contents and edition links work without JavaScript. |
 | `how-to.html` | Illustrated guide to the app and original method. |
@@ -61,7 +63,7 @@ The [reference correction ledger](https://plotto.tedt.org/corrections.html) reco
 
 GitHub Actions rebuilds and verifies the source, runs Python and JavaScript tests, checks that generated files are committed, and publishes through the existing Jekyll/GitHub Pages workflow. `CNAME` retains `plotto.tedt.org`. Build tools and tests are excluded from the published Jekyll output.
 
-The app runs entirely in the browser. Google Fonts supplies typography; the collection itself is served from this repository. The generator makes no external generation requests and keeps character names in browser state and the optional shared link.
+The app runs entirely in the browser. Google Fonts supplies typography; the collection itself is served from this repository. The generator makes no external generation requests and keeps character names in this browser’s local storage and the optional shared link. Saved names stay in the browser where they were entered; clearing site data removes them.
 
 ## Shared TedT.org navigation
 

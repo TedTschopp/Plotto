@@ -1,9 +1,11 @@
 import {generateOutline, renderOutline, cleanText, namedText, namedNote, outlineText,
   outlineCharacters, characterRole, nameKey, sharedState, MAX_SHARED_HASH_LENGTH} from './engine.js';
+import {loadCharacterNames, saveCharacterNames} from './name-storage.js';
 
 const $ = (id) => document.getElementById(id);
 const cache = new Map();
 let book, outline, loading = 0, visibleResults = 12;
+let rememberedNames = {a: '', b: ''}, namesLoaded = false, nameStorageAvailable = true;
 
 function element(tag, text, className) {
   const node = document.createElement(tag);
@@ -23,7 +25,7 @@ function showError(error) {
 function currentOptions() {
   return {group: $('theme').value, b: $('action').value, a: $('protagonist').value,
     c: $('ending').value, main: $('start-conflict').value,
-    names: {...outline?.state.names, a: $('name-a').value, b: $('name-b').value}};
+    names: {...rememberedNames, ...outline?.state.names, a: $('name-a').value, b: $('name-b').value}};
 }
 
 function markChanged() {
@@ -120,11 +122,34 @@ function stage(title, direction, entries) {
 
 function updateName(key, value) {
   if (!outline || book?.edition !== $('edition').value) return;
-  outline.state.names[key] = value.trim();
-  if (!value.trim() && key !== 'a' && key !== 'b') delete outline.state.names[key];
+  for (const names of [outline.state.names, rememberedNames]) {
+    names[key] = value.trim();
+    if (!value.trim() && key !== 'a' && key !== 'b') delete names[key];
+  }
+  nameStorageAvailable = saveCharacterNames(book, rememberedNames);
   markChanged();
   // Keep the input node (and its caret) in place while the story updates.
   render({updateCast: false});
+}
+
+function renderNameMemory() {
+  $('name-memory-note').textContent = nameStorageAvailable
+    ? 'Character names are saved automatically in this browser for your next visit.'
+    : 'This browser could not save your changes. Names are available for this visit.';
+  $('clear-names').disabled = ![...Object.values(rememberedNames), ...Object.values(outline?.state.names ?? {})].some(Boolean);
+}
+
+function clearNames() {
+  if (!outline || book?.edition !== $('edition').value) return;
+  rememberedNames = {a: '', b: ''};
+  outline.state.names = {a: '', b: ''};
+  $('name-a').value = '';
+  $('name-b').value = '';
+  nameStorageAvailable = saveCharacterNames(book, rememberedNames);
+  markChanged();
+  render();
+  status(nameStorageAvailable ? 'Character names cleared from this outline and this browser.'
+    : 'Character names cleared for this visit. This browser could not update its saved names.');
 }
 
 function renderSupportingCast(characters) {
@@ -182,6 +207,7 @@ function render({updateCast = true} = {}) {
     characters.append(element('dt', custom ? `${symbol} · ${custom}` : symbol), element('dd', description));
   }
   if (updateCast) renderSupportingCast(detected);
+  renderNameMemory();
   $('reader-link').href = `plotto-${book.edition}.html`;
 }
 
@@ -311,6 +337,14 @@ async function loadEdition(edition, savedState) {
     }
     if (request !== loading) return;
     book = cache.get(edition);
+    if (!namesLoaded) {
+      const savedNames = loadCharacterNames(book);
+      rememberedNames = savedNames.names;
+      nameStorageAvailable = savedNames.available;
+      namesLoaded = true;
+      $('name-a').value = rememberedNames.a;
+      $('name-b').value = rememberedNames.b;
+    }
     populateControls();
     $('edition').value = edition;
     $('generator-fields').disabled = false;
@@ -352,6 +386,7 @@ $('generator-form').addEventListener('submit', (event) => { event.preventDefault
 $('theme').addEventListener('change', updateActions);
 $('edition').addEventListener('change', () => loadEdition($('edition').value));
 $('retry').addEventListener('click', () => loadEdition($('edition').value));
+$('clear-names').addEventListener('click', clearNames);
 for (const key of ['a', 'b']) $('name-' + key).addEventListener('input', () => {
   updateName(key, $('name-' + key).value);
 });
