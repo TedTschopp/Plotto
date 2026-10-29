@@ -128,6 +128,7 @@ def read_book(edition='mf', source_path=None):
             section = line[6:]
         if line == '-- page 18':
             active = True
+            section = ''  # The character key ends here; later indexes are not definitions.
         if line == '-- page 190':
             active = False
         if line.startswith('--') or not line:

@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {applyOperations, replaceTogether, selectText, cleanText, generateOutline, renderOutline,
-  stageOptions, seededRandom, namedText, outlineText} from '../js/engine.js';
+  stageOptions, seededRandom, namedText, outlineText, outlineCharacters, characterRole, sharedState,
+  MAX_SHARED_HASH_LENGTH} from '../js/engine.js';
 
 const books = ['mf', 'fm'].map((edition) => JSON.parse(readFileSync(new URL(`../data/plotto-${edition}.json`, import.meta.url))));
 const corrections = JSON.parse(readFileSync(new URL('../data/source-corrections.json', import.meta.url))).slice(3);
@@ -107,11 +108,70 @@ test('names and text export preserve Unicode and do not rewrite relationship sym
   assert.match(text, /A = Márta/);
 });
 
+test('supporting names replace complete symbols once without cascading into other names', () => {
+  assert.equal(namedText('A meets A-3, A-3X, A-30, F-B, F-A and B.',
+    {a: 'A-3', b: 'Sam', 'A-3': 'Márta', 'F-B': '李明'}),
+  'A-3 meets Márta, A-3X, A-30, 李明, F-A and Sam.');
+  assert.equal(namedText('A-3’s friend and A-3.', {'A-3': ''}), 'A-3’s friend and A-3.');
+  assert.equal(namedText('A meets U in the U.S.A. and U.S.A', {a: 'Ada', U: 'Uri'}), 'Ada meets Uri in the U.S.A. and U.S.A');
+});
+
+test('cast detection reads adapted story symbols and added characters, excluding instructions and names', () => {
+  const book = books[0];
+  const outline = generateOutline(book, {main: '75a', names: {a: 'F-B', b: 'X-1'}}, seededRandom(12));
+  const adapted = applyOperations('A meets A-3 and F-A.', [{type: 'change', changes: [{from: 'A-3', to: 'B-3'}]},
+    {type: 'add', value: 'CH'}]);
+  outline.before.entries = [{...outline.main, text: adapted.text, notes: adapted.notes, reference: '110 ch A to A-9'}];
+  outline.main = {...outline.main, text: 'A asks “Who am I?” in the U.S.A. with F-B, SN, X-1, CH-2 and aB.'};
+  outline.after.entries = [{...outline.main, text: 'B meets A-3X.', notes: ['Editorial repair: A-9 replaces F-M.']}];
+  assert.deepEqual(outlineCharacters(outline, book).map(({symbol}) => symbol),
+    ['A', 'B-3', 'F-A', 'CH', 'F-B', 'SN', 'X-1', 'CH-2', 'aB', 'B', 'A-3X']);
+  assert.equal(characterRole('SN', book), 'son');
+  assert.equal(characterRole('aB', book), 'male protagonist');
+  assert.equal(characterRole('CH-2', book), 'a child');
+});
+
+test('supporting names survive regeneration, edition changes and share round-trips', () => {
+  const names = {a: 'Márta', b: 'Sam', 'A-3': 'Rowan', 'F-B': '李明', 'A-9': 'Unused'};
+  const first = generateOutline(books[0], {main: '269', names}, seededRandom(12));
+  assert.match(outlineText(first, books[0]), /李明/);
+  assert.match(outlineText(first, books[0]), /A-3 = Rowan/);
+  assert.doesNotMatch(outlineText(first, books[0]), /A-9 = Unused/);
+  const saved = sharedState(first, books[0]);
+  assert.equal(saved.names['A-9'], undefined);
+  assert.equal(first.state.names['A-9'], 'Unused');
+  assert.deepEqual(renderOutline(books[0], JSON.parse(JSON.stringify(saved))).state.names, saved.names);
+  assert.ok(encodeURIComponent(JSON.stringify(saved)).length < MAX_SHARED_HASH_LENGTH);
+  const regenerated = generateOutline(books[0], {main: '75a', names: first.state.names}, seededRandom(7));
+  assert.equal(regenerated.state.names['A-3'], 'Rowan');
+  const reversed = renderOutline(books[1], {...regenerated.state, edition: 'fm', hash: books[1].sourceHash});
+  assert.match(namedText(reversed.main.text, reversed.state.names), /Rowan/);
+  assert.equal(characterRole('A-3', books[1]), 'female rival or enemy of A');
+  // Links from before supporting cast names existed remain valid.
+  const legacy = {...first.state, names: {a: 'Márta', b: 'Sam'}};
+  assert.deepEqual(renderOutline(books[0], legacy).state, legacy);
+});
+
+test('exports name added-character notes but preserve source instructions and editorial evidence', () => {
+  const book = books[0];
+  const outline = generateOutline(book, {main: '75a', names: {a: 'Ada', b: 'Ben', CH: 'Eli', 'A-3': 'Rowan'}}, seededRandom(12));
+  outline.after.entries = [{...outline.main, reference: '75a ch A-3 to A',
+    notes: ['Include CH in this situation.', 'Editorial repair: A-3 appears in the printed instruction.']}];
+  const text = outlineText(outline, book);
+  assert.match(text, /Include Eli in this situation/);
+  assert.match(text, /Source instruction: 75a ch A-3 to A/);
+  assert.match(text, /Editorial repair: A-3 appears in the printed instruction/);
+  assert.match(text, /CH = Eli/);
+});
+
 test('malformed saved outlines fail with a recoverable error', () => {
   const book = books[0];
   const state = generateOutline(book, {main: '542'}, seededRandom(3)).state;
   for (const change of [{edition: 'fm'}, {v: 2}, {hash: 'old'}, {main: '<script>'}, {a: 0},
-    {names: {a: {}, b: ''}}, {before: {seed: -1}}, {after: {seed: 1, group: '0'}}]) {
+    {names: {a: {}, b: ''}}, {names: []}, {names: {a: '', b: '', 'A-3': {}}},
+    {names: {a: '', b: '', 'A-3': 'x'.repeat(61)}}, {names: {a: '', b: '', unknown: 'Name'}},
+    {names: JSON.parse('{"a":"","b":"","__proto__":"Name"}')},
+    {before: {seed: -1}}, {after: {seed: 1, group: '0'}}]) {
     assert.throws(() => renderOutline(book, {...state, ...change}));
   }
 });

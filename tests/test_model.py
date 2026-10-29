@@ -55,6 +55,14 @@ class SourceRules(unittest.TestCase):
             self.assertIn('her husband' if edition == 'fm' else 'his wife', text)
             self.assertIn('mother' if edition == 'fm' else 'father', book['characters']['M-A' if edition == 'fm' else 'F-A'])
 
+    def test_character_roles_come_from_the_key_instead_of_later_index_entries(self):
+        for edition, gender in [('mf', 'male'), ('fm', 'female')]:
+            characters = read_book(edition)['characters']
+            self.assertEqual(characters['A'], f'{gender} protagonist')
+            self.assertEqual(characters['A-3'], f'{gender} rival or enemy of A')
+            self.assertEqual(characters['F-B'], 'father of B')
+            self.assertEqual(characters['CH'], 'a child')
+
     def test_all_21_scan_audited_references_are_restored_and_editorials_are_disclosed(self):
         rows = json.loads((ROOT / 'data/source-corrections.json').read_text())[3:]
         self.assertEqual(len(rows), 21)

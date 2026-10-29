@@ -93,9 +93,13 @@ summary { font-size: .8125rem; font-weight: 600; min-height: 32px; }
 .export-tools button { font-size: .75rem; }
 .character-key { border-top: 1px solid var(--line); margin-top: 20px; padding-top: 16px; }
 .character-key summary { color: var(--muted); font-size: .75rem; }
-.character-key dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 18px; font-size: .75rem; }
-.character-key dt { font-weight: 600; }
-.character-key dd { margin: 0; color: var(--muted); }
+.character-key dl { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 6px 18px; font-size: .75rem; }
+.character-key dt { font-weight: 600; overflow-wrap: anywhere; }
+.character-key dd { margin: 0; color: var(--muted); overflow-wrap: anywhere; }
+.cast-names { border-top: 1px solid var(--line); padding-top: 20px; margin-bottom: 24px; }
+.cast-names h3 { font-size: 1.25rem; }
+.cast-name-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 20px; }
+.cast-name-grid .help { margin-top: 5px; }
 .browse-section { padding-top: 64px; }
 .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 20px; }
 .section-heading > a { font-size: .8125rem; }
@@ -144,6 +148,7 @@ summary { font-size: .8125rem; font-weight: 600; min-height: 32px; }
   .outline { padding: 26px 22px; }
   .search-form { grid-template-columns: 1fr; gap: 0; }
   .search-results { grid-template-columns: 1fr; }
+  .cast-name-grid { grid-template-columns: 1fr; }
   .section-heading { align-items: start; flex-direction: column; gap: 14px; }
   .how-grid { grid-template-columns: 1fr; gap: 24px; }
   .how-section, .browse-section { margin-top: 40px; padding-top: 30px; }
@@ -152,7 +157,7 @@ summary { font-size: .8125rem; font-weight: 600; min-height: 32px; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } button:active { transform: none; } }
 @media print {
-  tedt-global-header, .local-nav, .intro, .controls, .export-tools, .character-key, .browse-section, .how-section, .site-footer, .status, .stage-heading button, .alternatives { display: none !important; }
+  tedt-global-header, .local-nav, .intro, .controls, .cast-names, .export-tools, .character-key, .browse-section, .how-section, .site-footer, .status, .stage-heading button, .alternatives { display: none !important; }
   body { background: white !important; color: black !important; }
   .page-width { width: 100%; }
   .workbench { display: block; border: none; }
