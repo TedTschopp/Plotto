@@ -5,6 +5,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {generateOutline, seededRandom} from '../js/engine.js';
 import {CHARACTER_NAMES_KEY} from '../js/name-storage.js';
+import {CURRENT_STORY_KEY} from '../js/story-storage.js';
 const {chromium} = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const base = process.env.PLOTTO_URL || 'http://127.0.0.1:8765';
 const profile = await mkdtemp(join(tmpdir(), 'plotto-names-'));
@@ -68,6 +69,8 @@ try {
   await sharedPage.locator('#name-A-3').fill('My new rival');
   assert.deepEqual(await savedNames(sharedPage), {...cast, 'A-3': 'My new rival'});
   await sharedPage.close();
+  // Test reusable name preferences independently of the newly saved shared story.
+  await page.evaluate((key) => localStorage.removeItem(key), CURRENT_STORY_KEY);
   await page.goto(base, {waitUntil: 'domcontentloaded'});
   await ready(page);
   assert.equal(await page.locator('#name-a').inputValue(), cast.a);

@@ -1,6 +1,7 @@
 // Optional supporting-cast browser checks; uses the same environment as browser.mjs.
 import assert from 'node:assert/strict';
 import {mkdir, readFile} from 'node:fs/promises';
+import {CURRENT_STORY_KEY} from '../js/story-storage.js';
 const {chromium} = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const base = process.env.PLOTTO_URL || 'http://127.0.0.1:8765';
 const browser = await chromium.launch({headless: true});
@@ -87,6 +88,7 @@ try {
   await page.locator('#character-key summary').click();
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
   // A dataset failure must also disable the new name fields.
+  await page.evaluate((key) => localStorage.removeItem(key), CURRENT_STORY_KEY);
   const recovery = await context.newPage();
   await recovery.route('**/data/plotto-fm.json', (route) => route.fulfill({status: 503, body: 'unavailable'}));
   await recovery.goto(base, {waitUntil: 'domcontentloaded'});
