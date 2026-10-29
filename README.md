@@ -85,3 +85,7 @@ which is a blatantly bowdlerized version of the Cook's work, that makes only a p
 ## Donate
 
 If you find this project useful, consider [donating to the Internet Archive at archive.org](https://archive.org/donate/). The [Internet Archive](https://archive.org/) hosts digital copies of millions of books (including Plotto) that you can access and download for free. The digital version of Plotto used to start this project was downloaded from the [Internet Archive](https://archive.org/).
+
+## Shared TedT.org Navigation
+
+The global header loads `https://tedt.org/assets/global-header/v1/header.js`. Menu changes belong in the TedT.org repository, rather than in this site. The small local fallback and pre-paint bootstrap keep navigation and appearance usable while loading. The shared `tedt-appearance` cookie and `tedt:theme-change` event synchronize appearance; keep local site navigation and application controls separate. See https://tedt.org/docs/global-header.md for the embed contract.
