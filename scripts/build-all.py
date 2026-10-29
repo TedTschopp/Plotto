@@ -1,13 +1,21 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
+"""Rebuild both readers and generator datasets from any working directory."""
 
 import subprocess
+import sys
+from pathlib import Path
 
-configs = [
-	'config-mf.txt',
-	'config-fm.txt',
-	]
+from model import export_data
 
-for config in configs:
-	cmd = ['python', 'build.py', '--config', config]
-	subprocess.call(cmd)
+SCRIPTS = Path(__file__).resolve().parent
+
+
+def main():
+    for edition in ['mf', 'fm']:
+        subprocess.run([sys.executable, str(SCRIPTS / 'build.py'), '--config',
+                        str(SCRIPTS / f'config-{edition}.txt')], check=True)
+    export_data()
+
+
+if __name__ == '__main__':
+    main()

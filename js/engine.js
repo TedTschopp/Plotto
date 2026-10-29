@@ -1,0 +1,209 @@
+// Pure Plotto rules. This module has no browser or network dependencies.
+export function seededRandom(seed) {
+  let value = seed >>> 0;
+  return () => {
+    value += 0x6d2b79f5;
+    let x = Math.imul(value ^ (value >>> 15), 1 | value);
+    x ^= x + Math.imul(x ^ (x >>> 7), 61 | x);
+    return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const pick = (items, random) => items.length ? items[Math.floor(random() * items.length)] : null;
+const escapePattern = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const atomPattern = (value) => `(?<![\\w-])${escapePattern(value)}(?![\\w-])`;
+
+export function replaceTogether(text, changes) {
+  // Match once against the original text, so A→A-8 and A-3→A cannot cascade.
+  const matches = [];
+  for (const change of changes) {
+    let found = [...text.matchAll(new RegExp(atomPattern(change.from), 'g'))];
+    if (change.last) found = found.slice(-1);
+    found.forEach((match) => matches.push({start: match.index, end: match.index + match[0].length, value: change.to}));
+  }
+  matches.sort((a, b) => a.start - b.start || b.end - a.end);
+  let result = '', end = 0;
+  for (const match of matches) {
+    if (match.start < end) continue;
+    result += text.slice(end, match.start) + match.value;
+    end = match.end;
+  }
+  return result + text.slice(end);
+}
+
+export function applyOperations(text, operations) {
+  const notes = [];
+  for (const operation of operations) {
+    if (operation.type === 'change') text = replaceTogether(text, operation.changes);
+    else if (operation.type === 'transpose') {
+      text = replaceTogether(text, [{from: operation.from, to: operation.to}, {from: operation.to, to: operation.from}]);
+    } else if (operation.type === 'eliminate') {
+      text = replaceTogether(text, [{from: operation.value, to: ''}]);
+    } else if (operation.type === 'add') {
+      notes.push(`Include ${operation.value} in this situation.`);
+    }
+  }
+  return {text: text.replace(/ {2,}/g, ' ').trim(), notes};
+}
+
+export function selectText(text, reference) {
+  if (reference.section) {
+    const [from, to] = reference.section;
+    const marks = [...text.matchAll(/\*+/g)];
+    const start = from ? marks.find((m) => m[0].length === from) : null;
+    const end = marks.find((m) => m[0].length === to);
+    if ((from && !start) || !end || (start && start.index >= end.index)) return null;
+    text = text.slice(start ? start.index + start[0].length : 0, end.index);
+  }
+  if (reference.numbers?.length) {
+    const marks = [...text.matchAll(/\[(\d+)\]/g)];
+    if (reference.numbers.some((n) => !marks.some((m) => Number(m[1]) === n))) return null;
+    const prefix = text.slice(0, marks[0].index);
+    const choices = marks.flatMap((mark, i) => reference.numbers.includes(Number(mark[1]))
+      ? [text.slice(mark.index + mark[0].length, marks[i + 1]?.index ?? text.length).trim()] : []);
+    text = prefix + choices.join(' / ');
+  }
+  return text;
+}
+
+export function cleanText(text) {
+  return text.replace(/\((\d[^()]*)\)/g, '').replace(/@\{[^}]+\}/g, '')
+    .replace(/\*+/g, ' · ').replace(/\[(\d+)\]/g, 'Option $1: ')
+    .replace(/\s+/g, ' ').replace(/\s+([,;:.])/g, '$1').replace(/(?:\s*·\s*)+$/g, '').trim();
+}
+
+export function indexBook(book) {
+  return new Map(book.conflicts.map((conflict) => [conflict.id, conflict]));
+}
+
+function variantsFor(reference, index) {
+  if (reference.unavailable) return [];
+  const conflict = index.get(reference.id);
+  return (conflict?.variants ?? []).filter((variant) =>
+    (!reference.variants.length || reference.variants.includes(variant.id)) && selectText(variant.text, reference) !== null);
+}
+
+function usable(expression, index, excluded) {
+  if (expression.type === 'reference') return !excluded.has(expression.id) && variantsFor(expression, index).length > 0;
+  const check = (child) => usable(child, index, excluded);
+  return expression.type === 'choice' ? expression.items.some(check) : expression.items.every(check);
+}
+
+function resolve(expression, index, excluded, random) {
+  if (expression.type === 'choice') {
+    return resolve(pick(expression.items.filter((item) => usable(item, index, excluded)), random), index, excluded, random);
+  }
+  if (expression.type === 'sequence') return expression.items.flatMap((item) => resolve(item, index, excluded, random));
+  const conflict = index.get(expression.id);
+  const variant = pick(variantsFor(expression, index), random);
+  const adapted = applyOperations(selectText(variant.text, expression), expression.operations);
+  return [{id: conflict.id, variant: variant.id, reference: expression.label,
+    text: cleanText(adapted.text), notes: [...adapted.notes, ...expression.notes]}];
+}
+
+export function stageOptions(book, mainKey, direction, excludedIds = []) {
+  const index = indexBook(book);
+  const {conflict, variant} = getMain(book, mainKey, index);
+  const excluded = new Set([conflict.id, ...excludedIds]);
+  return variant[direction].map((group, groupIndex) => ({...group, groupIndex}))
+    .filter((group) => usable(group.expression, index, excluded));
+}
+
+function getMain(book, key, index = indexBook(book)) {
+  const match = /^(\d{1,4})([a-m]?)$/.exec(String(key).trim());
+  if (!match || !index.has(Number(match[1]))) throw new Error('Choose a conflict from 1 to 1462, optionally followed by its variant letter.');
+  const conflict = index.get(Number(match[1]));
+  const variant = conflict.variants.find((v) => v.id === match[2]);
+  if (!variant) throw new Error(`Conflict ${conflict.id} has these variants: ${conflict.variants.map((v) => v.id || '(whole conflict)').join(', ')}.`);
+  return {conflict, variant};
+}
+
+function renderStage(book, state, direction, excluded) {
+  const options = stageOptions(book, state.main, direction, excluded);
+  const random = seededRandom(state[direction].seed);
+  const group = options.find((option) => option.groupIndex === state[direction].group) ?? pick(options, random);
+  if (!group) return {entries: [], group: null, options};
+  return {entries: resolve(group.expression, indexBook(book), new Set([Number.parseInt(state.main, 10), ...excluded]), random),
+    group: group.groupIndex, label: group.label, options};
+}
+
+export function renderOutline(book, state) {
+  validateState(state, book);
+  const {conflict, variant} = getMain(book, state.main);
+  const before = renderStage(book, state, 'before', []);
+  const after = renderStage(book, state, 'after', before.entries.map((entry) => entry.id));
+  return {state, conflict,
+    a: book.clauses.a.find((clause) => clause.id === state.a),
+    b: book.clauses.b.find((clause) => clause.id === conflict.bClause),
+    c: book.clauses.c.find((clause) => clause.id === state.c),
+    main: {id: conflict.id, variant: variant.id, reference: state.main, text: cleanText(variant.text), notes: []},
+    before, after};
+}
+
+export function generateOutline(book, options = {}, random = Math.random) {
+  let conflict, variant;
+  const index = indexBook(book);
+  if (options.main?.trim()) {
+    const match = /^(\d{1,4})([a-m]?)$/.exec(options.main.trim());
+    conflict = match && index.get(Number(match[1]));
+    if (!conflict) throw new Error('Choose a conflict from 1 to 1462, optionally followed by its variant letter.');
+    variant = match[2] ? conflict.variants.find((v) => v.id === match[2]) : pick(conflict.variants, random);
+    if (!variant) throw new Error(`Conflict ${conflict.id} has no variant ${match[2]}.`);
+  } else {
+    const candidates = book.conflicts.filter((c) => (!options.group || c.group === options.group) &&
+      (!options.b || c.bClause === Number(options.b)));
+    if (!candidates.length) throw new Error('No conflicts match this theme and story action. Choose another action or use any theme.');
+    conflict = pick(candidates, random);
+    variant = pick(conflict.variants, random);
+  }
+  const state = {v: 1, edition: book.edition, hash: book.sourceHash, main: `${conflict.id}${variant.id}`,
+    a: Number(options.a) || pick(book.clauses.a, random).id,
+    c: Number(options.c) || pick(book.clauses.c, random).id,
+    before: {seed: Math.floor(random() * 4294967296)}, after: {seed: Math.floor(random() * 4294967296)},
+    names: {a: String(options.names?.a ?? '').trim().slice(0, 60), b: String(options.names?.b ?? '').trim().slice(0, 60)}};
+  return renderOutline(book, state);
+}
+
+export function validateState(state, book) {
+  if (!state || state.v !== 1 || state.edition !== book.edition || state.hash !== book.sourceHash ||
+      !book.clauses.a.some((c) => c.id === state.a) || !book.clauses.c.some((c) => c.id === state.c)) {
+    throw new Error('This saved outline is invalid or uses an older book dataset. Generate a new outline below.');
+  }
+  getMain(book, state.main);
+  for (const direction of ['before', 'after']) {
+    const stage = state[direction];
+    if (!stage || !Number.isInteger(stage.seed) || stage.seed < 0 || stage.seed > 4294967295 ||
+        (stage.group !== undefined && (!Number.isInteger(stage.group) || stage.group < 0 || stage.group > 100))) {
+      throw new Error('This outline contains an invalid linked suggestion. Generate a new outline below.');
+    }
+  }
+  if (!state.names || ['a', 'b'].some((key) => typeof state.names[key] !== 'string' || state.names[key].length > 60)) {
+    throw new Error('This outline contains an invalid character name. Generate a new outline below.');
+  }
+}
+
+export function namedText(text, names) {
+  return replaceTogether(text, ['a', 'b'].filter((key) => names[key]?.trim()).map((key) =>
+    ({from: key.toUpperCase(), to: names[key].trim()})));
+}
+
+export function outlineText(outline) {
+  const {state} = outline;
+  const lines = ['PLOTTO · A story outline', '', `${outline.a.text} / ${outline.b.text} / ${outline.c.text}`, ''];
+  const stages = [['Lead-up', outline.before.entries], ['Main conflict', [outline.main]], ['Carry-on', outline.after.entries]];
+  for (const [label, entries] of stages) {
+    lines.push(label.toUpperCase());
+    if (!entries.length) lines.push('No usable linked suggestion in the source for this stage.');
+    entries.forEach((entry) => {
+      lines.push(`[${entry.id}${entry.variant}] ${namedText(entry.text, state.names)}`);
+      entry.notes.forEach((note) => lines.push(`Note: ${namedText(note, state.names)}`));
+      if (entry.reference !== `${entry.id}${entry.variant}`) lines.push(`Source instruction: ${entry.reference}`);
+    });
+    lines.push('');
+  }
+  lines.push(`Edition: A=${state.edition === 'mf' ? 'male, B=female' : 'female, B=male'}`);
+  if (state.names.a) lines.push(`A = ${state.names.a}`);
+  if (state.names.b) lines.push(`B = ${state.names.b}`);
+  lines.push('Source: William Wallace Cook, Plotto (1928). Adapt these suggestions to your own story.');
+  return lines.join('\n');
+}
