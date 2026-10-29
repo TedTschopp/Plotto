@@ -12,6 +12,73 @@ export function seededRandom(seed) {
 const pick = (items, random) => items.length ? items[Math.floor(random() * items.length)] : null;
 const escapePattern = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const atomPattern = (value) => `(?<![\\w-])${escapePattern(value)}(?![\\w-])`;
+const symbolPattern = /(?<![\w-])[ab]?[A-Z]+(?:-[A-Z0-9]+)*(?![\w-])/g;
+const abbreviationPattern = /((?:[A-Z]\.){2,}(?:[A-Z](?![\w-]))?)/g;
+const symbolCatalogs = new WeakMap();
+export const MAX_SHARED_HASH_LENGTH = 128000;
+
+export const nameKey = (symbol) => symbol === 'A' || symbol === 'B' ? symbol.toLowerCase() : symbol;
+
+function symbolCatalog(book) {
+  if (!symbolCatalogs.has(book)) {
+    const symbols = Object.keys(book.characters);
+    symbolCatalogs.set(book, new Set([...symbols, ...symbols.map((symbol) => symbol.split('-')[0]), 'AUX', 'Y', 'Z']));
+  }
+  return symbolCatalogs.get(book);
+}
+
+function isSymbol(symbol, book) {
+  const plain = symbol.replace(/^[ab](?=[A-Z])/, '');
+  const catalog = symbolCatalog(book);
+  return catalog.has(plain) || (plain.endsWith('X') && catalog.has(plain.slice(0, -1))) ||
+    (/^(.+)-\d+$/.test(plain) && catalog.has(plain.replace(/-\d+$/, '')));
+}
+
+function validNameKey(key, book) {
+  return key === 'a' || key === 'b' || (key !== 'A' && key !== 'B' && key.length <= 20 &&
+    /^[ab]?[A-Z]+(?:-[A-Z0-9]+)*$/.test(key) && isSymbol(key, book));
+}
+
+function initialNames(names, book) {
+  const result = {a: '', b: ''};
+  for (const [key, value] of Object.entries(names ?? {})) {
+    if (validNameKey(key, book) && typeof value === 'string') result[key] = value.trim().slice(0, 60);
+  }
+  return result;
+}
+
+export function characterRole(symbol, book) {
+  if (Object.hasOwn(book.characters, symbol)) return book.characters[symbol];
+  if (/^[ab][A-Z]/.test(symbol)) {
+    const gender = symbol[0] === 'a' ? 'male' : 'female';
+    return characterRole(symbol.slice(1), book).replace(/^(male|female)\b/, gender);
+  }
+  if (symbol.endsWith('X') && symbolCatalog(book).has(symbol.slice(0, -1))) {
+    return `mysterious ${characterRole(symbol.slice(0, -1), book)}`;
+  }
+  if (/^(.+)-\d+$/.test(symbol)) return characterRole(symbol.replace(/-\d+$/, ''), book);
+  const relative = book.characters[`${symbol}-A`] ?? book.characters[`${symbol}-B`];
+  if (relative) return relative.replace(/^(male|female) /, '').replace(/ of [AB]$/, '');
+  return 'additional character or object in this story';
+}
+
+export function outlineCharacters(outline, book) {
+  const entries = [...outline.before.entries, outline.main, ...outline.after.entries];
+  // Read the adapted source, never custom names or reference/audit instructions.
+  const text = entries.flatMap((entry) => [entry.text, ...entry.notes.filter((note) =>
+    !note.startsWith('Editorial repair:'))]).join(' ').replace(abbreviationPattern, '');
+  const symbols = new Set([...text.matchAll(symbolPattern)].map((match) => match[0]).filter((symbol) => isSymbol(symbol, book)));
+  return [...symbols].map((symbol) => ({symbol, description: characterRole(symbol, book)}));
+}
+
+export function sharedState(outline, book) {
+  const names = {a: outline.state.names.a, b: outline.state.names.b};
+  for (const {symbol} of outlineCharacters(outline, book)) {
+    const key = nameKey(symbol);
+    if (outline.state.names[key]) names[key] = outline.state.names[key];
+  }
+  return {...outline.state, names};
+}
 
 export function replaceTogether(text, changes) {
   // Match once against the original text, so A→A-8 and A-3→A cannot cascade.
@@ -160,7 +227,7 @@ export function generateOutline(book, options = {}, random = Math.random) {
     a: Number(options.a) || pick(book.clauses.a, random).id,
     c: Number(options.c) || pick(book.clauses.c, random).id,
     before: {seed: Math.floor(random() * 4294967296)}, after: {seed: Math.floor(random() * 4294967296)},
-    names: {a: String(options.names?.a ?? '').trim().slice(0, 60), b: String(options.names?.b ?? '').trim().slice(0, 60)}};
+    names: initialNames(options.names, book)};
   return renderOutline(book, state);
 }
 
@@ -177,17 +244,25 @@ export function validateState(state, book) {
       throw new Error('This outline contains an invalid linked suggestion. Generate a new outline below.');
     }
   }
-  if (!state.names || ['a', 'b'].some((key) => typeof state.names[key] !== 'string' || state.names[key].length > 60)) {
+  if (!state.names || Array.isArray(state.names) || typeof state.names !== 'object' ||
+      !Object.hasOwn(state.names, 'a') || !Object.hasOwn(state.names, 'b') || Object.keys(state.names).length > 128 ||
+      Object.entries(state.names).some(([key, value]) => !validNameKey(key, book) || typeof value !== 'string' || value.length > 60)) {
     throw new Error('This outline contains an invalid character name. Generate a new outline below.');
   }
 }
 
 export function namedText(text, names) {
-  return replaceTogether(text, ['a', 'b'].filter((key) => names[key]?.trim()).map((key) =>
-    ({from: key.toUpperCase(), to: names[key].trim()})));
+  const changes = Object.entries(names).filter(([, value]) => typeof value === 'string' && value.trim()).map(([key, value]) =>
+    ({from: key === 'a' || key === 'b' ? key.toUpperCase() : key, to: value.trim()}));
+  // Letters inside abbreviations such as U.S.A. are not cast symbols.
+  return text.split(abbreviationPattern).map((part, index) => index % 2 ? part : replaceTogether(part, changes)).join('');
 }
 
-export function outlineText(outline) {
+export function namedNote(note, names) {
+  return note.startsWith('Editorial repair:') ? note : namedText(note, names);
+}
+
+export function outlineText(outline, book) {
   const {state} = outline;
   const lines = ['PLOTTO · A story outline', '', `${outline.a.text} / ${outline.b.text} / ${outline.c.text}`, ''];
   const stages = [['Lead-up', outline.before.entries], ['Main conflict', [outline.main]], ['Carry-on', outline.after.entries]];
@@ -196,14 +271,16 @@ export function outlineText(outline) {
     if (!entries.length) lines.push('No usable linked suggestion in the source for this stage.');
     entries.forEach((entry) => {
       lines.push(`[${entry.id}${entry.variant}] ${namedText(entry.text, state.names)}`);
-      entry.notes.forEach((note) => lines.push(`Note: ${namedText(note, state.names)}`));
+      entry.notes.forEach((note) => lines.push(`Note: ${namedNote(note, state.names)}`));
       if (entry.reference !== `${entry.id}${entry.variant}`) lines.push(`Source instruction: ${entry.reference}`);
     });
     lines.push('');
   }
   lines.push(`Edition: A=${state.edition === 'mf' ? 'male, B=female' : 'female, B=male'}`);
-  if (state.names.a) lines.push(`A = ${state.names.a}`);
-  if (state.names.b) lines.push(`B = ${state.names.b}`);
+  const used = book ? new Set(['a', 'b', ...outlineCharacters(outline, book).map(({symbol}) => nameKey(symbol))]) : null;
+  for (const [key, value] of Object.entries(state.names)) {
+    if (value && (!used || used.has(key))) lines.push(`${key === 'a' || key === 'b' ? key.toUpperCase() : key} = ${value}`);
+  }
   lines.push('Source: William Wallace Cook, Plotto (1928). Adapt these suggestions to your own story.');
   return lines.join('\n');
 }

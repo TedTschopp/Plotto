@@ -4,7 +4,7 @@
 
 Plotto is a static writing tool based on William Wallace Cook’s *Plotto: A New Method of Plot Suggestion for Writers of Creative Fiction* (1928). It combines a masterplot with linked situations from the book’s 1,462 conflicts and 1,852 variants.
 
-Choose a theme and character-role edition, then generate an outline. Each outline includes a protagonist/action/outcome framework, a main conflict, and linked lead-up and carry-on suggestions. Replace a stage, choose a linked alternative, search for a conflict, give A and B names, copy or download an outline, or share a link that restores it exactly.
+Choose a theme and character-role edition, then generate an outline. Each outline includes a protagonist/action/outcome framework, a main conflict, and linked lead-up and carry-on suggestions. Replace a stage, choose a linked alternative, search for a conflict, name the cast, copy or download an outline, or share a link that restores it exactly.
 
 ## The story rules
 
@@ -12,7 +12,7 @@ Choose a theme and character-role edition, then generate an outline. Each outlin
 - The main conflict determines the B clause. Theme and action filters narrow the starting choices; an explicit conflict number takes precedence.
 - Lead-ups and carry-ons follow that main variant’s actual references. Semicolons retain their sequence; `or` and comma-separated variant letters offer alternatives.
 - Star limits and numbered options select the requested section. Character changes are simultaneous within a change group; transpositions swap both symbols. Added-character instructions remain visible writing notes.
-- Names replace complete A/B symbols in displayed and exported text. Supporting symbols such as A-2 and F-A remain intact, with a character key alongside the outline.
+- Names replace complete character symbols in displayed and exported text. A and B have name fields in the options. The app scans the adapted outline and offers optional fields under “Name the supporting cast” for symbols such as A-3 and F-B, with their roles. Blank fields leave the symbols intact. Names stay with their symbols through new suggestions, regeneration, and edition changes; shared links include the names used in that outline.
 - A C clause supplies a writing direction. Linked situations may need further development to reach that outcome. Adapt pronouns, relationships, motives and setting as needed.
 - Shared links contain the selected edition, source revision, masterplot clauses, main variant, linked choices, and any names entered. They use no server-side storage. Links to an older source revision report the mismatch and allow a new outline.
 
@@ -32,7 +32,7 @@ python3 -m http.server 8765 --bind 127.0.0.1
 
 Open [the local preview](http://127.0.0.1:8765/). Use HTTP because the generator fetches its dataset. The linked book editions also work without JavaScript. `npm run build`, `npm test`, `npm run verify`, and `npm run dev` are shortcuts for the corresponding commands.
 
-For optional browser checks, install Playwright separately and run `node tests/browser.mjs` against the local server. `PLAYWRIGHT_MODULE` can point to an existing Playwright module; `PLOTTO_URL` selects another server. Browser screenshots go into the ignored `test-results/` directory.
+For optional browser checks, install Playwright separately and run `node tests/browser.mjs` and `node tests/cast-browser.mjs` against the local server. `PLAYWRIGHT_MODULE` can point to an existing Playwright module; `PLOTTO_URL` selects another server. Browser screenshots go into the ignored `test-results/` directory.
 
 ## Source and build
 

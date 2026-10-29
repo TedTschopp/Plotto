@@ -1,4 +1,5 @@
-import {generateOutline, renderOutline, cleanText, namedText, outlineText} from './engine.js';
+import {generateOutline, renderOutline, cleanText, namedText, namedNote, outlineText,
+  outlineCharacters, characterRole, nameKey, sharedState, MAX_SHARED_HASH_LENGTH} from './engine.js';
 
 const $ = (id) => document.getElementById(id);
 const cache = new Map();
@@ -22,7 +23,7 @@ function showError(error) {
 function currentOptions() {
   return {group: $('theme').value, b: $('action').value, a: $('protagonist').value,
     c: $('ending').value, main: $('start-conflict').value,
-    names: {a: $('name-a').value, b: $('name-b').value}};
+    names: {...outline?.state.names, a: $('name-a').value, b: $('name-b').value}};
 }
 
 function markChanged() {
@@ -45,7 +46,7 @@ function renderEntry(entry) {
     correction.style.marginLeft = '1rem';
     article.append(correction);
   }
-  for (const note of entry.notes) article.append(element('p', namedText(note, outline.state.names), 'adaptation-note'));
+  for (const note of entry.notes) article.append(element('p', namedNote(note, outline.state.names), 'adaptation-note'));
   if (entry.reference !== `${entry.id}${entry.variant}`) {
     article.append(element('p', `Source instruction: ${entry.reference}`, 'adaptation-note'));
   }
@@ -117,7 +118,41 @@ function stage(title, direction, entries) {
   return section;
 }
 
-function render() {
+function updateName(key, value) {
+  if (!outline || book?.edition !== $('edition').value) return;
+  outline.state.names[key] = value.trim();
+  if (!value.trim() && key !== 'a' && key !== 'b') delete outline.state.names[key];
+  markChanged();
+  // Keep the input node (and its caret) in place while the story updates.
+  render({updateCast: false});
+}
+
+function renderSupportingCast(characters) {
+  const supporting = characters.filter(({symbol}) => symbol !== 'A' && symbol !== 'B');
+  $('supporting-cast').hidden = supporting.length === 0;
+  const fields = $('supporting-name-fields');
+  fields.replaceChildren();
+  for (const {symbol, description} of supporting) {
+    const field = element('div');
+    const label = element('label', `Name for ${symbol} (optional)`);
+    const input = element('input');
+    input.type = 'text';
+    input.id = `name-${symbol}`;
+    input.dataset.symbol = symbol;
+    input.maxLength = 60;
+    input.autocomplete = 'off';
+    input.value = outline.state.names[nameKey(symbol)] || '';
+    label.htmlFor = input.id;
+    const role = element('p', description, 'help');
+    role.id = `role-${symbol}`;
+    input.setAttribute('aria-describedby', role.id);
+    input.addEventListener('input', () => updateName(nameKey(symbol), input.value));
+    field.append(label, input, role);
+    fields.append(field);
+  }
+}
+
+function render({updateCast = true} = {}) {
   const content = $('outline-content');
   content.replaceChildren();
   const master = element('div', undefined, 'masterplot');
@@ -139,13 +174,14 @@ function render() {
   $('copy-label').hidden = true;
   const characters = $('characters');
   characters.replaceChildren();
-  const text = [outline.main, ...outline.before.entries, ...outline.after.entries].map((entry) => entry.text).join(' ');
-  for (const [symbol, meaning] of Object.entries(book.characters)) {
-    if (['A', 'B'].includes(symbol) || new RegExp(`(?<![\\w-])${symbol}(?![\\w-])`).test(text)) {
-      const custom = symbol === 'A' ? outline.state.names.a : symbol === 'B' ? outline.state.names.b : '';
-      characters.append(element('dt', custom ? `${symbol} · ${custom}` : symbol), element('dd', meaning));
-    }
+  const detected = outlineCharacters(outline, book);
+  const keyCharacters = ['A', 'B'].map((symbol) => ({symbol, description: characterRole(symbol, book)}))
+    .concat(detected.filter(({symbol}) => symbol !== 'A' && symbol !== 'B'));
+  for (const {symbol, description} of keyCharacters) {
+    const custom = outline.state.names[nameKey(symbol)];
+    characters.append(element('dt', custom ? `${symbol} · ${custom}` : symbol), element('dd', description));
   }
+  if (updateCast) renderSupportingCast(detected);
   $('reader-link').href = `plotto-${book.edition}.html`;
 }
 
@@ -255,6 +291,7 @@ async function loadEdition(edition, savedState) {
   $('retry').hidden = true;
   $('outline').setAttribute('aria-busy', 'true');
   $('outline-content').inert = true;
+  $('supporting-cast').inert = true;
   $('search-results').inert = true;
   // Disable old edition controls until the new dataset is ready.
   $('export-tools').hidden = true;
@@ -281,6 +318,7 @@ async function loadEdition(edition, savedState) {
     $('search').disabled = false;
     $('browse-theme').disabled = false;
     $('outline-content').inert = false;
+    $('supporting-cast').inert = false;
     $('search-results').inert = false;
     if (savedState) {
       outline = renderOutline(book, savedState);
@@ -315,10 +353,7 @@ $('theme').addEventListener('change', updateActions);
 $('edition').addEventListener('change', () => loadEdition($('edition').value));
 $('retry').addEventListener('click', () => loadEdition($('edition').value));
 for (const key of ['a', 'b']) $('name-' + key).addEventListener('input', () => {
-  if (!outline || book?.edition !== $('edition').value) return;
-  outline.state.names[key] = $('name-' + key).value.trim();
-  markChanged();
-  render();
+  updateName(key, $('name-' + key).value);
 });
 $('search-form').addEventListener('submit', (event) => { event.preventDefault(); renderSearch(); });
 $('search').addEventListener('input', () => renderSearch());
@@ -329,14 +364,14 @@ $('more-results').addEventListener('click', () => {
   renderSearch(false);
   $('search-results').children[firstNew]?.querySelector('button')?.focus({preventScroll: true});
 });
-$('copy-outline').addEventListener('click', () => copy(outlineText(outline), 'Outline copied.'));
+$('copy-outline').addEventListener('click', () => copy(outlineText(outline, book), 'Outline copied.'));
 $('copy-link').addEventListener('click', () => {
   const url = new URL(location.href);
-  url.hash = `outline=${encodeURIComponent(JSON.stringify(outline.state))}`;
+  url.hash = `outline=${encodeURIComponent(JSON.stringify(sharedState(outline, book)))}`;
   copy(url.href, 'Link copied. It restores this outline, its edition, and your character names.');
 });
 $('download-outline').addEventListener('click', () => {
-  const url = URL.createObjectURL(new Blob([outlineText(outline)], {type: 'text/plain;charset=utf-8'}));
+  const url = URL.createObjectURL(new Blob([outlineText(outline, book)], {type: 'text/plain;charset=utf-8'}));
   const link = element('a');
   link.href = url;
   link.download = `plotto-${outline.state.main}.txt`;
@@ -348,7 +383,7 @@ $('download-outline').addEventListener('click', () => {
 let shared;
 try {
   if (location.hash.startsWith('#outline=')) {
-    if (location.hash.length > 12000) throw new Error('This shared outline is too large. Generate a new outline.');
+    if (location.hash.length > MAX_SHARED_HASH_LENGTH) throw new Error('This shared outline is too large. Generate a new outline.');
     shared = JSON.parse(decodeURIComponent(location.hash.slice(9)));
     if (!['mf', 'fm'].includes(shared?.edition)) throw new Error('This shared outline has an invalid edition.');
   }
