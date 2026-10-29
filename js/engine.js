@@ -39,10 +39,14 @@ function validNameKey(key, book) {
     /^[ab]?[A-Z]+(?:-[A-Z0-9]+)*$/.test(key) && isSymbol(key, book));
 }
 
-function initialNames(names, book) {
+export function normalizeNames(names, book) {
   const result = {a: '', b: ''};
-  for (const [key, value] of Object.entries(names ?? {})) {
-    if (validNameKey(key, book) && typeof value === 'string') result[key] = value.trim().slice(0, 60);
+  if (!names || typeof names !== 'object' || Array.isArray(names)) return result;
+  for (const [key, value] of Object.entries(names)) {
+    if (!validNameKey(key, book) || typeof value !== 'string') continue;
+    if (!Object.hasOwn(result, key) && Object.keys(result).length >= 128) continue;
+    const name = value.trim().slice(0, 60);
+    if (name || key === 'a' || key === 'b') result[key] = name;
   }
   return result;
 }
@@ -227,7 +231,7 @@ export function generateOutline(book, options = {}, random = Math.random) {
     a: Number(options.a) || pick(book.clauses.a, random).id,
     c: Number(options.c) || pick(book.clauses.c, random).id,
     before: {seed: Math.floor(random() * 4294967296)}, after: {seed: Math.floor(random() * 4294967296)},
-    names: initialNames(options.names, book)};
+    names: normalizeNames(options.names, book)};
   return renderOutline(book, state);
 }
 

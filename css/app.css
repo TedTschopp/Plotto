@@ -62,6 +62,7 @@ h1 { font: 400 clamp(2.7rem, 5vw, 4.2rem)/1.04 var(--font-title); letter-spacing
 .help { font-size: .75rem; line-height: 1.6; margin-top: 8px; }
 .optional { color: var(--muted); font-weight: 400; }
 .fine-tune { border-top: 1px solid var(--line); margin-top: 20px; padding-top: 16px; }
+.clear-names { margin-top: 10px; font-size: .75rem; }
 summary { font-size: .8125rem; font-weight: 600; min-height: 32px; }
 .primary-button { background: var(--navy); color: #fff; border-color: var(--navy); width: 100%; text-align: left; margin-top: 26px; display: flex; justify-content: space-between; align-items: center; gap: 16px; font-size: .875rem; padding: 14px 16px; }
 .primary-button:hover { background: #003452; border-color: #003452; }
