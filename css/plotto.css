@@ -237,5 +237,8 @@
 .guide h3 { margin: 24px 0 14px; }
 .guide p, .guide li { font: 400 1rem/1.7 var(--font-ui); margin-bottom: 14px; }
 .guide img { max-width: 100%; height: auto; border-radius: .375rem; }
+.correction-entry { border-top: 1px solid var(--line); margin-top: 32px; padding-top: 24px; scroll-margin-top: 100px; }
+.correction-entry h2 { margin-top: 8px; }
+.correction-entry code { overflow-wrap: anywhere; }
 @media (max-width: 600px) { .book-nav { gap: 8px 18px; padding-inline: 18px; justify-content: start; } .bodylist { padding-left: 35px; text-indent: -25px; } }
 @media print { .book-nav, .book-footer, .skip-link { display: none; } .container { width: 100%; } .clink, .clinkgroup { background: none; } }

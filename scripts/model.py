@@ -178,7 +178,24 @@ def read_book(edition='mf', source_path=None):
             body.append(line)
     if variant is not None:
         raise ValueError('Unclosed conflict at end of source')
+    annotate_corrections(book)
     return book
+
+
+def annotate_corrections(book):
+    """Make editorial choices visible whenever a repaired suggestion is used."""
+    ledger = json.loads((ROOT / 'data/source-corrections.json').read_text(encoding='utf-8'))
+    editorial = {(row['conflict'], row.get('variant', ''), row['direction'], row['after']): row
+                 for row in ledger if row.get('kind', '').startswith('editorial-')}
+    for conflict in book['conflicts']:
+        for variant in conflict['variants']:
+            for direction in ['before', 'after']:
+                for group in variant[direction]:
+                    for ref in references(group['expression']):
+                        row = editorial.get((conflict['id'], variant['id'], direction, ref['label']))
+                        if row:
+                            ref['correctionId'] = row['id']
+                            ref['notes'].append(f'Editorial repair: the book prints {row["printed"]}; this edition uses {row["after"]}.')
 
 
 def references(expression):
@@ -210,9 +227,7 @@ def validate_book(book):
                         if not target:
                             errors.append(f'{conflict["id"]}{variant["id"]}: unknown target {ref["label"]}')
                         elif ref['variants'] and not set(ref['variants']) <= {v['id'] for v in target['variants']}:
-                            # Keep the historical reference available in the reader.
-                            # The generator excludes it rather than guessing its intent.
-                            ref['unavailable'] = True
+                            errors.append(f'{conflict["id"]}{variant["id"]}: unknown variant {ref["label"]}')
     return errors
 
 

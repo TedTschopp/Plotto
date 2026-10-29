@@ -49,10 +49,11 @@ For optional browser checks, install Playwright separately and run `node tests/b
 | `index.html`, `css/app.css` | Generator interface, responsive layout, light/dark appearance and print styles. |
 | `plotto-mf.html`, `plotto-fm.html` | Generated readers. Native contents and edition links work without JavaScript. |
 | `how-to.html` | Illustrated guide to the app and original method. |
+| `scripts/corrections.py`, `corrections.html` | Generated correction history, scan evidence, and explicit editorial decisions. |
 
 Run the build after editing the source or renderer, then commit the updated HTML and JSON. Verification compares every rendered variant against its source and checks that datasets are current. The engine tests exercise all 1,852 variants in each edition, in addition to focused checks of the book’s reference rules.
 
-Three transcription corrections in conflicts 139, 214, and 461 were verified against pages 35, 44, and 71 of the original scans. Their old/new values and sources are recorded in `data/source-corrections.json`. Another 21 references per edition name subvariants absent from the transcribed text. Those references remain visible in the readers and are excluded from automatic selection. Section references without matching markers are also excluded; the generator reports when a stage has no usable suggestion.
+The [reference correction ledger](https://plotto.tedt.org/corrections.html) records 24 repairs, with printed forms, corrected targets, scan pages, checksums for the latest audit, and reasoning. The latest audit resolves all 21 formerly unavailable subvariant references: five were transcription errors, and sixteen were already broken in print. Ten editorial repairs normalize a missing suffix to the existing unlettered conflict; six use explicitly documented contextual or numbered-example interpretations. Editorial references carry a dagger in the readers and a visible note and evidence link in generated outlines. No missing story text is invented, and the 1,852-variant inventory is unchanged. Every lead-up and carry-on now resolves to existing variants; the build fails on unknown subvariants. Section references without matching markers remain excluded from generation.
 
 `scripts/fixup.py` is an optional transcription maintenance utility. It writes `plotto_new.txt` for manual review and is not part of the app build.
 
@@ -66,7 +67,7 @@ The app runs entirely in the browser. Google Fonts supplies typography; the coll
 
 The global header loads `https://tedt.org/assets/global-header/v1/header.js`. Menu changes belong in the TedT.org repository. Local fallback links and the appearance bootstrap keep navigation usable while loading. The `tedt-appearance` cookie and shared header synchronize appearance.
 
-The reader build uses `scripts/templates/global-header.html`. Keep that fragment identical in the generator and guide; verification checks all four pages. Global navigation stays separate from Plotto’s application controls.
+The reader build uses `scripts/templates/global-header.html`. Keep that fragment identical in the generator and guide; verification checks all five pages. Global navigation stays separate from Plotto’s application controls.
 
 ## Credits
 

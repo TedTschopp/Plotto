@@ -98,7 +98,7 @@ function resolve(expression, index, excluded, random) {
   const variant = pick(variantsFor(expression, index), random);
   const adapted = applyOperations(selectText(variant.text, expression), expression.operations);
   return [{id: conflict.id, variant: variant.id, reference: expression.label,
-    text: cleanText(adapted.text), notes: [...adapted.notes, ...expression.notes]}];
+    text: cleanText(adapted.text), notes: [...adapted.notes, ...expression.notes], correctionId: expression.correctionId ?? null}];
 }
 
 export function stageOptions(book, mainKey, direction, excludedIds = []) {

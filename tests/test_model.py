@@ -1,9 +1,10 @@
 import sys
 import unittest
+import json
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
-from model import parse_reference, parse_groups, edition_lines, read_book, validate_book
+from model import ROOT, parse_reference, parse_groups, edition_lines, read_book, validate_book, references
 
 
 class SourceRules(unittest.TestCase):
@@ -53,6 +54,39 @@ class SourceRules(unittest.TestCase):
             text = book['conflicts'][541]['variants'][0]['text']
             self.assertIn('her husband' if edition == 'fm' else 'his wife', text)
             self.assertIn('mother' if edition == 'fm' else 'father', book['characters']['M-A' if edition == 'fm' else 'F-A'])
+
+    def test_all_21_scan_audited_references_are_restored_and_editorials_are_disclosed(self):
+        rows = json.loads((ROOT / 'data/source-corrections.json').read_text())[3:]
+        self.assertEqual(len(rows), 21)
+        self.assertEqual(sum(row['kind'] == 'transcription' for row in rows), 5)
+        self.assertEqual(sum(row['kind'].startswith('editorial-') for row in rows), 16)
+        for edition in ['mf', 'fm']:
+            book = read_book(edition)
+            self.assertEqual(validate_book(book), [])
+            for row in rows:
+                conflict = book['conflicts'][row['conflict'] - 1]
+                variant = next(v for v in conflict['variants'] if v['id'] == row['variant'])
+                matches = [ref for group in variant[row['direction']] for ref in references(group['expression'])
+                           if ref['label'] == row['after']]
+                self.assertEqual(len(matches), 1, row['id'])
+                ref = matches[0]
+                self.assertFalse(ref.get('unavailable'), row['id'])
+                if row['kind'].startswith('editorial-'):
+                    self.assertEqual(ref['correctionId'], row['id'])
+                    self.assertIn(row['printed'], ref['notes'][-1])
+                else:
+                    self.assertEqual(row['printed'], row['after'])
+                self.assertIn(row['page'], [e['page'] for e in row['evidence']])
+                for evidence in row['evidence']:
+                    self.assertRegex(evidence['sha256'], r'^[a-f0-9]{64}$')
+
+    def test_unknown_subvariants_fail_validation_instead_of_being_silently_disabled(self):
+        book = read_book()
+        ref = book['conflicts'][1]['variants'][0]['after'][0]['expression']
+        ref['variants'] = ['m']
+        errors = validate_book(book)
+        self.assertTrue(any('unknown variant' in error for error in errors))
+        self.assertNotIn('unavailable', ref)
 
 
 if __name__ == '__main__':

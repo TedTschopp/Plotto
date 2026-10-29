@@ -39,6 +39,12 @@ function renderEntry(entry) {
   const article = element('div', undefined, 'story-entry');
   article.append(element('p', namedText(entry.text, outline.state.names), 'story-text'));
   article.append(sourceLink(entry));
+  if (entry.correctionId) {
+    const correction = element('a', 'Why this reference changed', 'story-ref');
+    correction.href = `corrections.html#${entry.correctionId}`;
+    correction.style.marginLeft = '1rem';
+    article.append(correction);
+  }
   for (const note of entry.notes) article.append(element('p', namedText(note, outline.state.names), 'adaptation-note'));
   if (entry.reference !== `${entry.id}${entry.variant}`) {
     article.append(element('p', `Source instruction: ${entry.reference}`, 'adaptation-note'));

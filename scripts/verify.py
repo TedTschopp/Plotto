@@ -9,6 +9,7 @@ from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 from model import ROOT, read_book, validate_book
+from corrections import render_corrections
 
 VOID = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'}
 
@@ -58,9 +59,11 @@ def normalized_text(text):
 
 
 def verify():
-    errors, unavailable = [], 0
-    names = ['index.html', 'how-to.html', 'plotto-mf.html', 'plotto-fm.html']
+    errors = []
+    names = ['index.html', 'how-to.html', 'corrections.html', 'plotto-mf.html', 'plotto-fm.html']
     pages = {name: PageAudit((ROOT / name).read_text(encoding='utf-8')) for name in names}
+    if (ROOT / 'corrections.html').read_text(encoding='utf-8') != render_corrections():
+        errors.append('corrections.html is stale; rebuild the correction ledger page')
     header = (ROOT / 'scripts/templates/global-header.html').read_text(encoding='utf-8').strip()
     for name, page in pages.items():
         source = (ROOT / name).read_text(encoding='utf-8')
@@ -97,13 +100,11 @@ def verify():
         for key, text in expected.items():
             if normalized_text(page.descriptions.get(key, '')) != normalized_text(text):
                 errors.append(f'plotto-{edition}.html: text differs from source for {key[0]}{key[1]}')
-        unavailable += sum(1 for c in book['conflicts'] for v in c['variants'] for d in ['before', 'after']
-                           for g in v[d] for r in walk(g['expression']) if r.get('unavailable'))
     if errors:
         print('\n'.join(errors), file=sys.stderr)
         return 1
     print('Verified both editions: 1,462 conflicts and 1,852 variants each, source fidelity, fresh datasets, shared headers, and local links.')
-    print(f'{unavailable // 2} historical references to unavailable subvariants are retained in readers and excluded from generation in each edition.')
+    print('All lead-up and carry-on references resolve to existing conflict variants in both editions.')
     return 0
 
 
