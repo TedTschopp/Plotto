@@ -1,5 +1,662 @@
 [
-  {"conflict":139,"page":35,"before":"097","after":"997","source":"https://archive.org/details/plottonewmethodo00cook/page/35/mode/1up","verified":"2026-10-29"},
-  {"conflict":214,"page":44,"before":"3633","after":"363a","source":"https://archive.org/details/plottonewmethodo00cook/page/44/mode/1up","verified":"2026-10-29"},
-  {"conflict":461,"page":71,"before":"4913","after":"491b","source":"https://archive.org/details/plottonewmethodo00cook/page/71/mode/1up","verified":"2026-10-29"}
+  {
+    "conflict": 139,
+    "page": 35,
+    "before": "097",
+    "after": "997",
+    "source": "https://archive.org/details/plottonewmethodo00cook/page/35/mode/1up",
+    "verified": "2026-10-29",
+    "id": "ref-139-initial",
+    "variant": "",
+    "direction": "before",
+    "kind": "transcription",
+    "printed": "997",
+    "reason": "The original scan confirms the corrected reference; the old form was a transcription error."
+  },
+  {
+    "conflict": 214,
+    "page": 44,
+    "before": "3633",
+    "after": "363a",
+    "source": "https://archive.org/details/plottonewmethodo00cook/page/44/mode/1up",
+    "verified": "2026-10-29",
+    "id": "ref-214-initial",
+    "variant": "",
+    "direction": "after",
+    "kind": "transcription",
+    "printed": "363a",
+    "reason": "The original scan confirms the corrected reference; the old form was a transcription error."
+  },
+  {
+    "conflict": 461,
+    "page": 71,
+    "before": "4913",
+    "after": "491b",
+    "source": "https://archive.org/details/plottonewmethodo00cook/page/71/mode/1up",
+    "verified": "2026-10-29",
+    "id": "ref-461-initial",
+    "variant": "",
+    "direction": "inline",
+    "kind": "transcription",
+    "printed": "491b",
+    "reason": "The original scan confirms the corrected reference; the old form was a transcription error."
+  },
+  {
+    "id": "ref-2a-after",
+    "conflict": 2,
+    "variant": "a",
+    "direction": "after",
+    "page": 18,
+    "before": "146a, c",
+    "printed": "146a, c",
+    "after": "1461a, c",
+    "kind": "editorial-context",
+    "reason": "Page 18 prints 146a, c, but page 36 has only an unlettered 146 about captivity. This edition restores the likely omitted final 1: 1461a and 1461c concern confession and revelation of identity, matching the poor clerk posing as wealthy in 2a. The adjacent carry-on already names 1461a with A changed to B. This is a contextual editorial inference; the scan does not confirm the author’s intended number.",
+    "source": "https://archive.org/details/plottonewmethodo00cook/page/18/mode/1up",
+    "verified": "2026-10-29",
+    "evidence": [
+      {
+        "page": 18,
+        "leaf": 26,
+        "sha256": "093a3e798a5c03d65f5c637a54486457f1b02f68686071c570cbe94e21318826",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/18/mode/1up"
+      },
+      {
+        "page": 36,
+        "leaf": 44,
+        "sha256": "756521a28450977e0f5476fd384787a49910e02f9036d26178bafc4c7cbd6757",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/36/mode/1up"
+      },
+      {
+        "page": 188,
+        "leaf": 196,
+        "sha256": "acd976797d63822b465c2ad40fbac610a1481c07d107e3f75d28bc138cb80439",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/188/mode/1up"
+      }
+    ]
+  },
+  {
+    "id": "ref-75a-after",
+    "conflict": 75,
+    "variant": "a",
+    "direction": "after",
+    "page": 29,
+    "before": "1267d",
+    "printed": "1267d",
+    "after": "1267a",
+    "kind": "editorial-context",
+    "reason": "Page 29 prints 1267d. Pages 161–162 contain only 1267a–c; the next conflict is 1268, so no d text can be recovered. This edition selects 1267a, the existing trap situation that fits the rival’s attempt to eliminate A. The other two variants concern a captive miser and a dying person’s will. This is an editorial choice, not a recovered variant d.",
+    "source": "https://archive.org/details/plottonewmethodo00cook/page/29/mode/1up",
+    "verified": "2026-10-29",
+    "evidence": [
+      {
+        "page": 29,
+        "leaf": 37,
+        "sha256": "9bfd59e023fa5a1fd7e704d34b05ca6966fd2734cde385a65964c6a59bde04df",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/29/mode/1up"
+      },
+      {
+        "page": 161,
+        "leaf": 169,
+        "sha256": "2d91ec1a9fb27abb43203ec677dc16f570c1a2a2b2947b6fbf6e5c7f6a8c7a57",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/161/mode/1up"
+      },
+      {
+        "page": 162,
+        "leaf": 170,
+        "sha256": "9439ca7420605e1b189a91aa223b40e78c1b866a264db9ce68d1475b4241f66a",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/162/mode/1up"
+      }
+    ]
+  },
+  {
+    "id": "ref-158-after",
+    "conflict": 158,
+    "variant": "",
+    "direction": "after",
+    "page": 37,
+    "before": "285a",
+    "printed": "265a",
+    "after": "265a",
+    "kind": "transcription",
+    "reason": "The carry-on on page 37 reads 265a, not 285a. Variant 265a is printed on page 50.",
+    "source": "https://archive.org/details/plottonewmethodo00cook/page/37/mode/1up",
+    "verified": "2026-10-29",
+    "evidence": [
+      {
+        "page": 37,
+        "leaf": 45,
+        "sha256": "575eabb0f5391cefed7f30dbab1462fc996272c0eda3c2c79cf6841a1c18c2c6",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/37/mode/1up"
+      },
+      {
+        "page": 50,
+        "leaf": 58,
+        "sha256": "2f1a4e798505aa592d787d3d7c1a9f7aef8b80b62ebfcfb59df2910b9fa145c7",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/50/mode/1up"
+      }
+    ]
+  },
+  {
+    "id": "ref-174-after",
+    "conflict": 174,
+    "variant": "",
+    "direction": "after",
+    "page": 39,
+    "before": "810a",
+    "printed": "816a",
+    "after": "816a",
+    "kind": "transcription",
+    "reason": "Page 39 prints the compound carry-on 816a; 1265b. Page 110 prints 816a, whose lead-up names 174; 1265b also prints the reciprocal sequence 174; 816a on page 161.",
+    "source": "https://archive.org/details/plottonewmethodo00cook/page/39/mode/1up",
+    "verified": "2026-10-29",
+    "evidence": [
+      {
+        "page": 39,
+        "leaf": 47,
+        "sha256": "50c1c783271890b6db81dedd16b29252200676e91a3265f719acf1881e17eb6d",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/39/mode/1up"
+      },
+      {
+        "page": 110,
+        "leaf": 118,
+        "sha256": "bc7956e026ef481cb783802f86cb439681ecb3fee83a66f7a77670d2be7c3a81",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/110/mode/1up"
+      },
+      {
+        "page": 161,
+        "leaf": 169,
+        "sha256": "2d91ec1a9fb27abb43203ec677dc16f570c1a2a2b2947b6fbf6e5c7f6a8c7a57",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/161/mode/1up"
+      }
+    ]
+  },
+  {
+    "id": "ref-194b-before",
+    "conflict": 194,
+    "variant": "b",
+    "direction": "before",
+    "page": 42,
+    "before": "325a",
+    "printed": "325a",
+    "after": "325",
+    "kind": "editorial-unlettered",
+    "reason": "Page 42 prints 325a; 261. Page 56 prints a single unlettered conflict 325, followed immediately by 326. Resolve the unavailable suffix to that whole printed conflict and retain the following 261 step. The book supplies no separate a text.",
+    "source": "https://archive.org/details/plottonewmethodo00cook/page/42/mode/1up",
+    "verified": "2026-10-29",
+    "evidence": [
+      {
+        "page": 42,
+        "leaf": 50,
+        "sha256": "a49120d5419f57abcc9c8e42959158e50e251a7226fee7f206115c6605215eea",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/42/mode/1up"
+      },
+      {
+        "page": 56,
+        "leaf": 64,
+        "sha256": "1d2264b6e60f23f3db35589f7884c73ec982701585acf56b6f0ed265f0332184",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/56/mode/1up"
+      }
+    ]
+  },
+  {
+    "id": "ref-234b-after",
+    "conflict": 234,
+    "variant": "b",
+    "direction": "after",
+    "page": 46,
+    "before": "384b",
+    "printed": "364b",
+    "after": "364b",
+    "kind": "transcription",
+    "reason": "The carry-on at the bottom of page 46 reads 364b. Page 60 prints that reconciliation-and-marriage variant.",
+    "source": "https://archive.org/details/plottonewmethodo00cook/page/46/mode/1up",
+    "verified": "2026-10-29",
+    "evidence": [
+      {
+        "page": 46,
+        "leaf": 54,
+        "sha256": "a02617a1a702b0d7b18e1deeaa8bcbf1fb97b3e3086d2cdf2f2c80b042531701",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/46/mode/1up"
+      },
+      {
+        "page": 60,
+        "leaf": 68,
+        "sha256": "b4e3c8f2b740d12b9c74b19b050ea0ba5c8ae49f3b0463d6cb4d2f1189ea3580",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/60/mode/1up"
+      }
+    ]
+  },
+  {
+    "id": "ref-263-before",
+    "conflict": 263,
+    "variant": "",
+    "direction": "before",
+    "page": 49,
+    "before": "1146a ch A to A-3",
+    "printed": "1146a ch A to A-3",
+    "after": "1146 ch A to A-3",
+    "kind": "editorial-unlettered",
+    "reason": "Page 49 prints 1146a ch A to A-3. Page 148 prints only an unlettered 1146 about a crook pretending wealth. Resolve the suffix to the existing whole conflict and retain the character change.",
+    "source": "https://archive.org/details/plottonewmethodo00cook/page/49/mode/1up",
+    "verified": "2026-10-29",
+    "evidence": [
+      {
+        "page": 49,
+        "leaf": 57,
+        "sha256": "54a7514e12bbe9216ce20384f13cfab13532b548be1cc7aa5733028371cb120c",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/49/mode/1up"
+      },
+      {
+        "page": 148,
+        "leaf": 156,
+        "sha256": "0631d27b2f134bd4633dd08630419474f1bae3e9fbb53715cde1825363b97b23",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/148/mode/1up"
+      }
+    ]
+  },
+  {
+    "id": "ref-265a-before",
+    "conflict": 265,
+    "variant": "a",
+    "direction": "before",
+    "page": 50,
+    "before": "1312a",
+    "printed": "1342a",
+    "after": "1342a",
+    "kind": "transcription",
+    "reason": "Page 50 prints 1342a, not 1312a. Page 173 prints 1342a and explicitly refers back to 265a.",
+    "source": "https://archive.org/details/plottonewmethodo00cook/page/50/mode/1up",
+    "verified": "2026-10-29",
+    "evidence": [
+      {
+        "page": 50,
+        "leaf": 58,
+        "sha256": "2f1a4e798505aa592d787d3d7c1a9f7aef8b80b62ebfcfb59df2910b9fa145c7",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/50/mode/1up"
+      },
+      {
+        "page": 173,
+        "leaf": 181,
+        "sha256": "f1dde572d2dc7fec5854fc092a942d6dcaea79fc3a906b4d61e2656d6b569bdf",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/173/mode/1up"
+      }
+    ]
+  },
+  {
+    "id": "ref-360b-before",
+    "conflict": 360,
+    "variant": "b",
+    "direction": "before",
+    "page": 60,
+    "before": "21a, b",
+    "printed": "24a, b",
+    "after": "24a, b",
+    "kind": "transcription",
+    "reason": "Page 60 prints 24a, b, not 21a, b. The two variants appear under conflict 24 on page 23.",
+    "source": "https://archive.org/details/plottonewmethodo00cook/page/60/mode/1up",
+    "verified": "2026-10-29",
+    "evidence": [
+      {
+        "page": 60,
+        "leaf": 68,
+        "sha256": "b4e3c8f2b740d12b9c74b19b050ea0ba5c8ae49f3b0463d6cb4d2f1189ea3580",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/60/mode/1up"
+      },
+      {
+        "page": 23,
+        "leaf": 31,
+        "sha256": "803dc95fbf0c301b8cf52348aebd7bdeecfeaead787d85b2c781646d615bb243",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/23/mode/1up"
+      }
+    ]
+  },
+  {
+    "id": "ref-456-after",
+    "conflict": 456,
+    "variant": "",
+    "direction": "after",
+    "page": 70,
+    "before": "1447a tr A & A-8",
+    "printed": "1447a tr A & A-8",
+    "after": "1447 tr A & A-8",
+    "kind": "editorial-unlettered",
+    "reason": "Page 70 prints 1447a tr A & A-8. Page 187 has a single unlettered 1447, with a reciprocal carry-on to 456 changing A to A-8. Resolve to that whole conflict and preserve the printed transposition.",
+    "source": "https://archive.org/details/plottonewmethodo00cook/page/70/mode/1up",
+    "verified": "2026-10-29",
+    "evidence": [
+      {
+        "page": 70,
+        "leaf": 78,
+        "sha256": "e38e88a091dee53673770e2169ff7c413da6b9d379c9b9787eed6c5c20203182",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/70/mode/1up"
+      },
+      {
+        "page": 187,
+        "leaf": 195,
+        "sha256": "d0a6d252151dca4ce52c00f9473930a21e37f20ee4f7305b0931ef3900cf202c",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/187/mode/1up"
+      }
+    ]
+  },
+  {
+    "id": "ref-476a-before",
+    "conflict": 476,
+    "variant": "a",
+    "direction": "before",
+    "page": 72,
+    "before": "389a, b",
+    "printed": "389a, b",
+    "after": "398a, b",
+    "kind": "editorial-context",
+    "reason": "Page 72 prints 389a, b. Page 63 has an unlettered 389 about the legality of a second marriage; page 64 has 398a and 398b about a neglected wife and the other man, matching the setup of 476a. This edition treats 389 as a transposition of 398. This is a contextual editorial inference.",
+    "source": "https://archive.org/details/plottonewmethodo00cook/page/72/mode/1up",
+    "verified": "2026-10-29",
+    "evidence": [
+      {
+        "page": 72,
+        "leaf": 80,
+        "sha256": "88e01c551072db78dd34eb933c7e55558ebfbb66d9dda9379c521c800056daff",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/72/mode/1up"
+      },
+      {
+        "page": 63,
+        "leaf": 71,
+        "sha256": "52ccc02859b582e4267907eb22d996bd826fb56fab8241a6112f92019b7c3a61",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/63/mode/1up"
+      },
+      {
+        "page": 64,
+        "leaf": 72,
+        "sha256": "d930825e8058102d9150d70181bc3203bcb1e15edc9f7a97518365536a5d456e",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/64/mode/1up"
+      }
+    ]
+  },
+  {
+    "id": "ref-565-before",
+    "conflict": 565,
+    "variant": "",
+    "direction": "before",
+    "page": 83,
+    "before": "975a",
+    "printed": "975a",
+    "after": "975",
+    "kind": "editorial-unlettered",
+    "reason": "Page 83 prints 975a. Page 128 prints a single unlettered conflict 975. Resolve the unavailable suffix to that whole conflict. No variant a has been recovered, and no different conflict number is asserted as the author’s intent.",
+    "source": "https://archive.org/details/plottonewmethodo00cook/page/83/mode/1up",
+    "verified": "2026-10-29",
+    "evidence": [
+      {
+        "page": 83,
+        "leaf": 91,
+        "sha256": "4b1c700cc543570d9f977eb06dc79c0375a98cf8b9b6bf2e30a5a4d13f8225ea",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/83/mode/1up"
+      },
+      {
+        "page": 128,
+        "leaf": 136,
+        "sha256": "4182208b7cd47ac777083f9362c06f16325ccac62ec9e568c607230d64436e0c",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/128/mode/1up"
+      }
+    ]
+  },
+  {
+    "id": "ref-626-before",
+    "conflict": 626,
+    "variant": "",
+    "direction": "before",
+    "page": 90,
+    "before": "966c",
+    "printed": "966c",
+    "after": "966-3",
+    "kind": "editorial-numbered",
+    "reason": "Page 90 prints 959; 966c. Page 127 divides conflict 966 into numbered examples, not lettered variants; example [3] concerns scientific attempts to override heredity. This edition interprets c as the third example and uses the book’s numbered-reference notation, 966-3, for the scientific-experiment lead-up. This is an editorial inference.",
+    "source": "https://archive.org/details/plottonewmethodo00cook/page/90/mode/1up",
+    "verified": "2026-10-29",
+    "evidence": [
+      {
+        "page": 90,
+        "leaf": 98,
+        "sha256": "b162fe41a86d637c7c00b8f3887b59326d49c75ffff8b37220754e6b41da0c2a",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/90/mode/1up"
+      },
+      {
+        "page": 127,
+        "leaf": 135,
+        "sha256": "8d400734b744356629e2861e156b77c1ce53a56e49d8db5b33776752fbd65bed",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/127/mode/1up"
+      }
+    ]
+  },
+  {
+    "id": "ref-757-before",
+    "conflict": 757,
+    "variant": "",
+    "direction": "before",
+    "page": 103,
+    "before": "126a, b",
+    "printed": "126a, b",
+    "after": "726a, b",
+    "kind": "editorial-context",
+    "reason": "Page 103 prints 126a, b, but page 34 has only an unlettered 126 about persuasion to transgress. Page 100 prints 726a and 726b about an interrupted enterprise and illness before a difficult duty, matching 757. This edition changes the likely mistaken leading digit to 7. This is a contextual editorial inference.",
+    "source": "https://archive.org/details/plottonewmethodo00cook/page/103/mode/1up",
+    "verified": "2026-10-29",
+    "evidence": [
+      {
+        "page": 103,
+        "leaf": 111,
+        "sha256": "d50fcaad2fe7196bd0ea5f9b3dd9694b1de164add5fd9d777d6771a1c4a7c170",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/103/mode/1up"
+      },
+      {
+        "page": 34,
+        "leaf": 42,
+        "sha256": "ea13acb633456d882807b08b21ec409b74948902ad17d36c4ec80de528f2b7c3",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/34/mode/1up"
+      },
+      {
+        "page": 100,
+        "leaf": 108,
+        "sha256": "e1e138cb853f2253653b0f6d8325859f48110ac51ffee6b233ed8a48a078a3b1",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/100/mode/1up"
+      }
+    ]
+  },
+  {
+    "id": "ref-1052b-after",
+    "conflict": 1052,
+    "variant": "b",
+    "direction": "after",
+    "page": 137,
+    "before": "1116b ch A to A-8",
+    "printed": "1116b ch A to A-8",
+    "after": "1116 ch A to A-8",
+    "kind": "editorial-unlettered",
+    "reason": "Page 137 prints 1116b ch A to A-8. Page 144 has a single unlettered 1116 about an accident delaying a steamer. Resolve to that whole conflict and retain the printed character substitution; no missing b text is invented.",
+    "source": "https://archive.org/details/plottonewmethodo00cook/page/137/mode/1up",
+    "verified": "2026-10-29",
+    "evidence": [
+      {
+        "page": 137,
+        "leaf": 145,
+        "sha256": "e5c7e69806b15bbc7ab61b71d8ea44ec327593e54367b7fc7851ceb985e7be71",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/137/mode/1up"
+      },
+      {
+        "page": 144,
+        "leaf": 152,
+        "sha256": "010a0888877292c9c010c57993757525497e18b70182a9d0202ea3cf77778350",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/144/mode/1up"
+      }
+    ]
+  },
+  {
+    "id": "ref-1099-before",
+    "conflict": 1099,
+    "variant": "",
+    "direction": "before",
+    "page": 143,
+    "before": "325a",
+    "printed": "325a",
+    "after": "325",
+    "kind": "editorial-unlettered",
+    "reason": "Page 143 prints 325a. Page 56 has only the unlettered conflict 325. Resolve the unavailable suffix to that whole printed conflict, as for the same printed error in 194b.",
+    "source": "https://archive.org/details/plottonewmethodo00cook/page/143/mode/1up",
+    "verified": "2026-10-29",
+    "evidence": [
+      {
+        "page": 143,
+        "leaf": 151,
+        "sha256": "cf1126d90d45fd1cfddc10974830db9663379bf080a4faf1a051978e3fa3a84d",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/143/mode/1up"
+      },
+      {
+        "page": 56,
+        "leaf": 64,
+        "sha256": "1d2264b6e60f23f3db35589f7884c73ec982701585acf56b6f0ed265f0332184",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/56/mode/1up"
+      }
+    ]
+  },
+  {
+    "id": "ref-1343-before",
+    "conflict": 1343,
+    "variant": "",
+    "direction": "before",
+    "page": 173,
+    "before": "1282a -*",
+    "printed": "1282a -*",
+    "after": "1382a -*",
+    "kind": "editorial-context",
+    "reason": "Page 173 prints 1282a-*. Page 163 has only an unlettered 1282 about a disguise after robbery. Page 178 prints 1382a about acquiring an object of mystery and explicitly lists 1343 as a lead-up. This edition changes the likely mistaken second digit and retains the first-section limit. This is a contextual editorial inference.",
+    "source": "https://archive.org/details/plottonewmethodo00cook/page/173/mode/1up",
+    "verified": "2026-10-29",
+    "evidence": [
+      {
+        "page": 173,
+        "leaf": 181,
+        "sha256": "f1dde572d2dc7fec5854fc092a942d6dcaea79fc3a906b4d61e2656d6b569bdf",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/173/mode/1up"
+      },
+      {
+        "page": 163,
+        "leaf": 171,
+        "sha256": "2809a713e6e54896cbd54a76a01e3a0a68960441e5b99a2de2d968e37c0346ef",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/163/mode/1up"
+      },
+      {
+        "page": 178,
+        "leaf": 186,
+        "sha256": "dd6fb3eb3689ed3efb85e837868a24d228c7117f67e3177109cb19bd7a5280b5",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/178/mode/1up"
+      }
+    ]
+  },
+  {
+    "id": "ref-1345-before",
+    "conflict": 1345,
+    "variant": "",
+    "direction": "before",
+    "page": 173,
+    "before": "567a",
+    "printed": "567a",
+    "after": "567",
+    "kind": "editorial-unlettered",
+    "reason": "Page 173 prints 567a. Page 83 prints only an unlettered 567. Resolve the unavailable suffix to that whole conflict; the scan does not supply a separate a text or justify changing the conflict number.",
+    "source": "https://archive.org/details/plottonewmethodo00cook/page/173/mode/1up",
+    "verified": "2026-10-29",
+    "evidence": [
+      {
+        "page": 173,
+        "leaf": 181,
+        "sha256": "f1dde572d2dc7fec5854fc092a942d6dcaea79fc3a906b4d61e2656d6b569bdf",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/173/mode/1up"
+      },
+      {
+        "page": 83,
+        "leaf": 91,
+        "sha256": "4b1c700cc543570d9f977eb06dc79c0375a98cf8b9b6bf2e30a5a4d13f8225ea",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/83/mode/1up"
+      }
+    ]
+  },
+  {
+    "id": "ref-1350-before",
+    "conflict": 1350,
+    "variant": "",
+    "direction": "before",
+    "page": 174,
+    "before": "567a",
+    "printed": "567a",
+    "after": "567",
+    "kind": "editorial-unlettered",
+    "reason": "Page 174 prints 567a. Page 83 prints only an unlettered 567. Resolve the unavailable suffix to the whole printed conflict, preserving the number rather than claiming an unverified alternative.",
+    "source": "https://archive.org/details/plottonewmethodo00cook/page/174/mode/1up",
+    "verified": "2026-10-29",
+    "evidence": [
+      {
+        "page": 174,
+        "leaf": 182,
+        "sha256": "bea9dc23fe394f8ba2b10e832228c3d04cbe3c7e666f56c911e6f11996dc48b0",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/174/mode/1up"
+      },
+      {
+        "page": 83,
+        "leaf": 91,
+        "sha256": "4b1c700cc543570d9f977eb06dc79c0375a98cf8b9b6bf2e30a5a4d13f8225ea",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/83/mode/1up"
+      }
+    ]
+  },
+  {
+    "id": "ref-1371-after",
+    "conflict": 1371,
+    "variant": "",
+    "direction": "after",
+    "page": 176,
+    "before": "1456a",
+    "printed": "1456a",
+    "after": "1456",
+    "kind": "editorial-unlettered",
+    "reason": "Page 176 prints 1456a. Page 188 prints only an unlettered 1456 about proving a criminal’s guilt. Resolve the suffix to that whole printed conflict.",
+    "source": "https://archive.org/details/plottonewmethodo00cook/page/176/mode/1up",
+    "verified": "2026-10-29",
+    "evidence": [
+      {
+        "page": 176,
+        "leaf": 184,
+        "sha256": "321fa3cd251bea004e76868d0d0535e1a093d3cbc85e285d6d9b73b8c8f23785",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/176/mode/1up"
+      },
+      {
+        "page": 188,
+        "leaf": 196,
+        "sha256": "acd976797d63822b465c2ad40fbac610a1481c07d107e3f75d28bc138cb80439",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/188/mode/1up"
+      }
+    ]
+  },
+  {
+    "id": "ref-1420-after",
+    "conflict": 1420,
+    "variant": "",
+    "direction": "after",
+    "page": 182,
+    "before": "1416b",
+    "printed": "1416b",
+    "after": "1416",
+    "kind": "editorial-unlettered",
+    "reason": "Page 182 prints 1416b, but the same page prints a single unlettered 1416 followed by 1417. Resolve the suffix to that whole printed conflict. This does not claim to recover a missing b situation or to establish the author’s intended subdivision.",
+    "source": "https://archive.org/details/plottonewmethodo00cook/page/182/mode/1up",
+    "verified": "2026-10-29",
+    "evidence": [
+      {
+        "page": 182,
+        "leaf": 190,
+        "sha256": "d482c69b814e21548053b36acc054d7563d83ec79fe011b24a1c7e87acbd46d5",
+        "source": "https://archive.org/details/plottonewmethodo00cook/page/182/mode/1up"
+      }
+    ]
+  }
 ]

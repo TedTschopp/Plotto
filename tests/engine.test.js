@@ -5,6 +5,7 @@ import {applyOperations, replaceTogether, selectText, cleanText, generateOutline
   stageOptions, seededRandom, namedText, outlineText} from '../js/engine.js';
 
 const books = ['mf', 'fm'].map((edition) => JSON.parse(readFileSync(new URL(`../data/plotto-${edition}.json`, import.meta.url))));
+const corrections = JSON.parse(readFileSync(new URL('../data/source-corrections.json', import.meta.url))).slice(3);
 
 test('character substitutions are simultaneous and respect complete symbols', () => {
   const result = replaceTogether('A helps A-3, A-2, and F-A. A’s plans affect A.', [
@@ -112,5 +113,27 @@ test('malformed saved outlines fail with a recoverable error', () => {
   for (const change of [{edition: 'fm'}, {v: 2}, {hash: 'old'}, {main: '<script>'}, {a: 0},
     {names: {a: {}, b: ''}}, {before: {seed: -1}}, {after: {seed: 1, group: '0'}}]) {
     assert.throws(() => renderOutline(book, {...state, ...change}));
+  }
+});
+
+test('all 21 repaired reference groups can actually be selected in both editions', () => {
+  const refs = (expression) => expression.type === 'reference' ? [expression] : expression.items.flatMap(refs);
+  for (const book of books) {
+    for (const row of corrections) {
+      const main = `${row.conflict}${row.variant}`;
+      const option = stageOptions(book, main, row.direction).find((group) => refs(group.expression).some((ref) => ref.label === row.after));
+      assert.ok(option, `${book.edition}: repaired group available for ${row.id}`);
+      const state = generateOutline(book, {main}, seededRandom(45)).state;
+      state[row.direction].group = option.groupIndex;
+      const stage = renderOutline(book, state)[row.direction];
+      assert.equal(stage.group, option.groupIndex, row.id);
+      const entry = stage.entries.find((item) => item.reference === row.after);
+      assert.ok(entry, row.id);
+      assert.ok(entry.text.length > 0);
+      if (row.kind.startsWith('editorial-')) {
+        assert.equal(entry.correctionId, row.id);
+        assert.match(entry.notes.join(' '), /Editorial repair:/);
+      } else assert.equal(entry.correctionId, null);
+    }
   }
 });

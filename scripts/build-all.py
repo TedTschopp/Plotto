@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 from model import export_data
+from corrections import build_corrections
 
 SCRIPTS = Path(__file__).resolve().parent
 
@@ -15,6 +16,7 @@ def main():
         subprocess.run([sys.executable, str(SCRIPTS / 'build.py'), '--config',
                         str(SCRIPTS / f'config-{edition}.txt')], check=True)
     export_data()
+    build_corrections()
 
 
 if __name__ == '__main__':

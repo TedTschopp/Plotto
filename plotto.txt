@@ -1164,7 +1164,7 @@ Conflict{2}
 A, a poor clerk, finances a “fling” in high society * A, a poor clerk financing a “fling”
 in high society, meets wealthy and aristocratic B (1146 ch A to B) (1187 ch A to B),
 and they fall in love **
-POST: (1461a ch A to B) (146a, c)
+POST: (1461a ch A to B) (1461a, c)
 
 (b) PRE: (1146) (1175a) (1197)
 A, a fugitive from the law and using a fictitious name, falls in love with B * A,
@@ -2031,7 +2031,7 @@ Conflict{75}
 
 (a) PRE: (266) (280a) (290)
 A and A-3 are in love with B. A-3 seeks by craftiness to eliminate A
-POST: (79) (1228) (1253) (1267d) (1265 tr A & A-3)
+POST: (79) (1228) (1253) (1267a) (1265 tr A & A-3)
 
 (b) PRE: (75a) (76)
 A, through the wily manoeuvers of A-3. his rival in love, is innocently lured into
@@ -2777,7 +2777,7 @@ Conflict{158}
 PRE: (159) (171)
 A’s rival for the hand of B, A-3, is more energetic and enterprising than A and
 seems to be more favored
-POST: (85a) (177) (285a) (364a)
+POST: (85a) (177) (265a) (364a)
 
 Conflict{159}
 
@@ -2917,7 +2917,7 @@ PRE: (160) (157)
 -- HER obj
 A and A-3, rivals in love, agree to meet at a certain hour, call on B, and ask her
 to choose between them
-POST: (183) (810a; 1265b)
+POST: (183) (816a; 1265b)
 
 
 B{3} Seeking to Demonstrate the Power of Love by a Test of Courage
@@ -3145,7 +3145,7 @@ B, thinking A loves her and lacks the courage to make an avowal, proposes marria
 to him after he has rescued her from a tragic accident
 POST: (191 tr A & B) (264) (307) (325)
 
-(b) PRE: (260b) (325a; 261)
+(b) PRE: (260b) (325; 261)
 B sends a telegram to A-3 accepting his offer of marriage * B, accepting A-3’s
 proposal of marriage by telegram, through error sends the telegram to A, the lover
 from whom she is estranged **
@@ -3489,7 +3489,7 @@ POST: (81) (1227b, c)
 A, an aviator, is a person of masterful character * A, an aviator, in love with B and
 in disfavor with B’s parents, F-B and M-B, induces B to take a ride in his airplane;
 and then A elopes with B along the sky lanes **
-POST: (384b) (249)
+POST: (364b) (249)
 
 -- page 47
 
@@ -3744,7 +3744,7 @@ POST: (249) (312-1) (326-4)
 
 Conflict{263}
 
-PRE: (958) (1146a ch A to A-3) (1181 ch A to A-3)
+PRE: (958) (1146 ch A to A-3) (1181 ch A to A-3)
 B rejects A, an honorable lover, and accepts A-3, who is a knave * A becomes a
 crook **
 POST: (819 ch A-5 to A-3) (818a tr A & A-4)
@@ -3761,7 +3761,7 @@ B{15} Finding a Sustaining Power in Misfortune
 
 Conflict{265}
 
-(a) PRE: (300) (1312a) (1389b)
+(a) PRE: (300) (1342a) (1389b)
 A, while in a psychic state, has a prophetic vision of his rival in love, A-3,
 discredited, and of himself achieving happiness in love
 POST: (1361b; 326-3) (290; 266)
@@ -4663,7 +4663,7 @@ A, thinking his love rejected by B, receives a letter from B telling him how muc
 she loves him, and that her father, F-B, has consented to their marriage
 POST: (562) (571)
 
-(b) PRE: (20a, b) (21a, b)
+(b) PRE: (20a, b) (24a, b)
 A loves B, but he is uncertain of her affections and is too timid to propose
 marriage * A finds an object, X, which B has lost, an object that proves her love for
 him (165) ** A joyfully proposes to B and is accepted ***
@@ -5596,7 +5596,7 @@ B bears a close physical resemblance to B-8 * B marries A. B has property in
 her own name which, by a marriage settlement, is to descend to A if he outlives B **
 B-8 dies, and A contrives to make it appear that it was B who died *** B, as B-8,
 is immured in an insane asylum, and A inherits the money belonging to B ****
-POST: (732) (1447a tr A & A-8) (1461a)
+POST: (732) (1447 tr A & A-8) (1461a)
 
 
 B{13} Seeking by Craftiness to Escape Misfortune
@@ -5763,7 +5763,7 @@ POST: (1334a) (1342a) (1374) (1375)
 
 Conflict{476}
 
-(a) PRE: (389a, b) (405)
+(a) PRE: (398a, b) (405)
 B, wife of A, is craftily persuaded by A-3, the “other man”
 in a “love triangle,” to elope with him
 POST: (397) (400)
@@ -6659,7 +6659,7 @@ POST: (385a) (418)
 
 Conflict{565}
 
-PRE: (975a) (957a) (976) (1133; 1120)
+PRE: (975) (957a) (976) (1133; 1120)
 B cherishes a dear desire that her husband, A, shall become religiously inclined
 POST: (504a) (1427b) (1445 ch B to A)
 
@@ -7261,7 +7261,7 @@ POST: (641) (1155)
 
 Conflict{626}
 
-PRE: (959; 966c) (925 -*)
+PRE: (959; 966-3) (925 -*)
 A, in making a scientific experiment, has unintentionally caused his daughter, D,
 a grievous injury
 POST: (627 ch B to D) (227 ch B to D, A to A-8 & F-B to A)
@@ -8429,7 +8429,7 @@ POST: (1153 ch B to A; 1248) (1388) (1434) (949a)
 
 Conflict{757}
 
-PRE: (114) (710) (126a, b)
+PRE: (114) (710) (726a, b)
 A, confronting a hard and dangerous duty, is suddenly taken very ill and compelled
 to go to bed
 POST: (1163a) (1163c) (1164 tr A & A-4)
@@ -11166,7 +11166,7 @@ POST: (845 ch A-2 to A-8) (1451b)
 A is abandoned to die in mid-ocean by A-9, captain of a steamship, who refuses
 to delay his vessel to make the rescue * A is rescued from a boat adrift in mid-ocean
 when an accident delays the steamer of which A-9 is captain **
-POST: (1034) (1116b ch A to A-8)
+POST: (1034) (1116 ch A to A-8)
 
 -- page 138
 
@@ -11561,7 +11561,7 @@ POST: (1426b; 181c) (1376; 1097b) (1435) (1413a, b)
 
 Conflict{1099}
 
-PRE: (32) (102) (145) (325a) (335)
+PRE: (32) (102) (145) (325) (335)
 B is too young, too attractive, too modern for the scholarly position she occupies;
 and her success, which means happiness to her, is endangered * B, young and attractive,
 in order to win success in her chosen work, dresses the part of a spinster,
@@ -13912,7 +13912,7 @@ POST: (1366) (1375)
 
 Conflict{1343}
 
-PRE: (1380) (1282a -*) (1383)
+PRE: (1380) (1382a -*) (1383)
 A carries in his pocket a queer object of mystery, X * A, apparently as the result
 of carrying in his pocket a queer object of mystery, X, experiences all sorts of
 misfortunes.** (595) (596) (597) (1352) (1377b) (1382 *-**) Note: [l] X
@@ -13931,7 +13931,7 @@ POST: (633) (794)
 
 Conflict{1345}
 
-PRE: (53) (567a) (683) (887b) (681a)
+PRE: (53) (567) (683) (887b) (681a)
 A is under the delusion that he lives in a chaotic world, such a world as is pictured
 by pessimists
 POST: (1331) (1332) (1351)
@@ -13980,7 +13980,7 @@ POST: (1266 ch A-3 to A-7) (1267a) (1266 ch A to A-7 & A-3 to A)
 
 Conflict{1350}
 
-PRE: (567a) (857)
+PRE: (567) (857)
 A thinks himself obsessed with a fear of speeding automobiles, and that the cars
 that are trying to run him down are phantom cars * A, in order to disprove a
 fancied hallucination, deliberately throws himself in front of a speeding automobile
@@ -14196,7 +14196,7 @@ Conflict{1371}
 PRE: (1290a ch A to A-5) (1334c)
 A is positive, in his own mind, that his friend, A-2, has been murdered by A-5 *
 A suspects A-5, seemingly an honest man, of a crime, and tries to prove him guilty **
-POST: (1222a ch A-3 to A-5) (1413a) (1456a) (1413 ch A-3 to A-5)
+POST: (1222a ch A-3 to A-5) (1413a) (1456) (1413 ch A-3 to A-5)
 
 -- page 177
 
@@ -14662,7 +14662,7 @@ Conflict{1420}
 PRE: (1330) (1342a) (1418a)
 A, while trying to discover perpetual motion, dreams that he has invented a
 machine, X, that defies the power of gravitation
-POST: (1424b) (1455b) (1416b)
+POST: (1424b) (1455b) (1416)
 
 Conflict{1421}
 

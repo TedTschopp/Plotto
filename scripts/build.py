@@ -7,6 +7,8 @@ import getopt
 import os.path
 import re
 import sys
+import json
+from html import escape
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -97,6 +99,19 @@ class Parser():
 	def __init__(self):
 		self.A = 'm'
 		self.B = 'f'
+		self.reference_corrections = {
+			(str(row['conflict']), row.get('variant', ''), row['after']): row
+			for row in json.loads((ROOT / 'data/source-corrections.json').read_text(encoding='utf-8'))
+		}
+		self.variant_anchors = set()
+		current_id = ''
+		for line in (ROOT / 'plotto.txt').read_text(encoding='utf-8').splitlines():
+			match = re.fullmatch(r'Conflict\{(\d+)\}', line)
+			if match:
+				current_id = match[1]
+			match = re.match(r'\(([a-m])\) PRE:', line)
+			if match and current_id:
+				self.variant_anchors.add(current_id + match[1])
 
 		self.page = 0
 		self.in_conflict_section = False
@@ -248,14 +263,20 @@ class Parser():
 			return ''
 
 		# (123a, b, c)
-		m = re.match(r'^(\d+)([a-h](, [a-h])*)?(?P<extra>.*)$', link)
+		m = re.match(r'^(\d+)([a-m](, [a-m])*)?(?P<extra>.*)$', link)
 		if not m:
 			error('Invalid links: {0}'.format(orig_link))
 		id = m.group(1)
 		subid = m.group(2)
 
-		orig_link = orig_link.replace("&", "&amp;")
-		return '<a href="#{0}" class="clink">{1}</a>'.format(id, orig_link)
+		row = self.reference_corrections.get((self.id, self.subid, orig_link))
+		target = id + subid[0] if row and subid and id + subid[0] in self.variant_anchors else id
+		attrs, marker = '', ''
+		if row and row.get('kind', '').startswith('editorial-'):
+			label = '%s (editorial repair; printed %s)' % (orig_link, row['printed'])
+			attrs = ' aria-label="%s" title="%s"' % (escape(label, quote=True), escape(label, quote=True))
+			marker = '<sup aria-hidden="true">†</sup>'
+		return '<a href="#{0}" class="clink"{2}>{1}{3}</a>'.format(target, escape(orig_link), attrs, marker)
 
 	# Process an entire line from the file.
 	def process_line(self, line):
@@ -459,7 +480,7 @@ class Parser():
 		self.outfile.write('<div class="frontmatter">\n')
 
 	def write_html_footer(self):
-		self.outfile.write('</main>\n<footer class="book-footer"><a href="./">Back to the plot generator</a> · William Wallace Cook, 1928</footer>\n</body>\n</html>\n')
+		self.outfile.write('</main>\n<footer class="book-footer"><a href="./">Back to the plot generator</a> · <a href="corrections.html">† Editorial repairs and reference corrections</a> · William Wallace Cook, 1928</footer>\n</body>\n</html>\n')
 
 	def write_navbar(self):
 		self.outfile.write('<nav class="book-nav" aria-label="Plotto"><a href="./">Plot generator</a><details><summary>Book contents</summary><div class="contents-links">')
