@@ -1,0 +1,12 @@
+title: Plotto
+url: https://plotto.tedt.org
+exclude:
+  - README.md
+  - how-to.md
+  - scripts
+  - tests
+  - package.json
+  - package-lock.json
+  - node_modules
+  - test-results
+  - renovate.json

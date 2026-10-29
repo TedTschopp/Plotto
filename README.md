@@ -1,91 +1,75 @@
 # Plotto
 
-[**Plotto - A new method of plot suggestion for writers of creative fiction**](https://garykac.github.io/plotto/plotto-mf.html)  
-by William Wallace Cook, 1867-1933  
-Published 1928
+[Open Plotto](https://plotto.tedt.org/) · [Illustrated guide](https://plotto.tedt.org/how-to.html) · [Original book scans](https://archive.org/details/plottonewmethodo00cook)
 
-This project's goal is to take the raw **Plotto** text and convert it into a
-format that can be easily parsed and hyperlinked.
+Plotto is a static writing tool based on William Wallace Cook’s *Plotto: A New Method of Plot Suggestion for Writers of Creative Fiction* (1928). It combines a masterplot with linked situations from the book’s 1,462 conflicts and 1,852 variants.
 
-Electronic copies of this book (in a variety of formats) can be found in the [Internet Archive](https://archive.org/):
-https://archive.org/details/plottonewmethodo00cook
+Choose a theme and character-role edition, then generate an outline. Each outline includes a protagonist/action/outcome framework, a main conflict, and linked lead-up and carry-on suggestions. Replace a stage, choose a linked alternative, search for a conflict, give A and B names, copy or download an outline, or share a link that restores it exactly.
 
-## What is Plotto?
+## The story rules
 
-Plotto is an "algebra" for stories that an author (or storyteller) can use to help create works of fiction.
+- Masterplots combine one of 15 A clauses, 62 B clauses, and 15 C clauses. Clause letters describe story structure; character symbols A and B describe people.
+- The main conflict determines the B clause. Theme and action filters narrow the starting choices; an explicit conflict number takes precedence.
+- Lead-ups and carry-ons follow that main variant’s actual references. Semicolons retain their sequence; `or` and comma-separated variant letters offer alternatives.
+- Star limits and numbered options select the requested section. Character changes are simultaneous within a change group; transpositions swap both symbols. Added-character instructions remain visible writing notes.
+- Names replace complete A/B symbols in displayed and exported text. Supporting symbols such as A-2 and F-A remain intact, with a character key alongside the outline.
+- A C clause supplies a writing direction. Linked situations may need further development to reach that outcome. Adapt pronouns, relationships, motives and setting as needed.
+- Shared links contain the selected edition, source revision, masterplot clauses, main variant, linked choices, and any names entered. They use no server-side storage. Links to an older source revision report the mismatch and allow a new outline.
 
-It is a collection of 1,462 generic plot conflicts that can be chained together into a "masterplot" that forms the core plot structure for the story.
+The original text includes dated language and prejudiced depictions. Both editions retain that material. The reversed-role edition exchanges gendered language and family relationships.
 
-## Getting Started
+## Local development
 
-The quickest way to get a feel of what Plotto offers is to simply jump to a [random plot conflict](https://garykac.github.io/plotto/plotto-mf.html?random) and then begin exploring.
+Python 3.12+ and Node.js 22+ are sufficient. There are no application packages to install and no server, API key, database, or paid service to configure.
 
-A detailed description of how to use Plotto can be found in the (aptly named) [How to Use Plotto](how-to.md) document.
+```sh
+python3 scripts/build-all.py
+python3 scripts/verify.py
+python3 -m unittest discover -s tests -p 'test_*.py'
+node --test tests/*.test.js
+python3 -m http.server 8765 --bind 127.0.0.1
+```
 
-It is important to note that the conflicts described in Plotto are not intended to be taken literally and applied verbatim. Rather, they are suggestions that you should adapt to fit the story that you want to tell.
+Open [the local preview](http://127.0.0.1:8765/). Use HTTP because the generator fetches its dataset. The linked book editions also work without JavaScript. `npm run build`, `npm test`, `npm run verify`, and `npm run dev` are shortcuts for the corresponding commands.
 
-## Plotto and Modern Times
+For optional browser checks, install Playwright separately and run `node tests/browser.mjs` against the local server. `PLAYWRIGHT_MODULE` can point to an existing Playwright module; `PLOTTO_URL` selects another server. Browser screenshots go into the ignored `test-results/` directory.
 
-Plotto was published in the late 20's and was written over the course of the preceding decades. During this period of history the Titanic sunk, we learned how to fly, there was a world war, and women gained the right to vote in the US. Notably missing from this period are things that we often take for granted in the modern world: many conveniences afforded by advances in technology and, significantly, the notions of civil and equal rights.
+## Source and build
 
-While Plotto's disconnect from the modern world can be entertaining at times, as in the examples of "dare-devil" activity that include (from [1356](https://garykac.github.io/plotto/plotto-mf.html#1356)):
+| Path | Responsibility |
+| --- | --- |
+| `plotto.txt` | Annotated source text: groups, clauses, conflicts, PRE/POST links, formatting and pronoun hints. |
+| `scripts/build.py` | Python 3 renderer for the two linked book editions, including the shared header. |
+| `scripts/model.py` | Structured source parser, reference-instruction parser and per-edition data export. |
+| `scripts/build-all.py` | Rebuild both readers and datasets from any working directory; stop on a failed build. |
+| `scripts/verify.py` | Verify source fidelity, dataset freshness, all variants, shared headers and local navigation. |
+| `data/plotto-mf.json`, `data/plotto-fm.json` | Generated browser datasets. Rebuild these rather than editing them. |
+| `js/engine.js` | Pure selection, section extraction, character adaptation and export rules. |
+| `js/app.js` | Accessible controls, search, rendering, shared links and clipboard/download handling. |
+| `index.html`, `css/app.css` | Generator interface, responsive layout, light/dark appearance and print styles. |
+| `plotto-mf.html`, `plotto-fm.html` | Generated readers. Native contents and edition links work without JavaScript. |
+| `how-to.html` | Illustrated guide to the app and original method. |
 
-* a “trick” bicycle rider with a “loop the loop” specialty
-* an aviator whose specialty is airplane stunts
-* a “human fly” who climbs the walls of tall buildings
+Run the build after editing the source or renderer, then commit the updated HTML and JSON. Verification compares every rendered variant against its source and checks that datasets are current. The engine tests exercise all 1,852 variants in each edition, in addition to focused checks of the book’s reference rules.
 
-the outdated ideas on race can sometimes lead to jarring experiences:
+Three transcription corrections in conflicts 139, 214, and 461 were verified against pages 35, 44, and 71 of the original scans. Their old/new values and sources are recorded in `data/source-corrections.json`. Another 21 references per edition name subvariants absent from the transcribed text. Those references remain visible in the readers and are excluded from automatic selection. Section references without matching markers are also excluded; the generator reports when a stage has no usable suggestion.
 
-* [650](https://garykac.github.io/plotto/plotto-mf.html#650) "a white man cast away among bloodthirsty savages",
-* [332](https://garykac.github.io/plotto/plotto-mf.html#332) "B, of alien blood and inferior race, seeks to marry A, the Caucasian with whom she is in love"
-* [718](https://garykac.github.io/plotto/plotto-mf.html#718) "A, believed by all to be a white man, knows there is negro blood in his veins"
+`scripts/fixup.py` is an optional transcription maintenance utility. It writes `plotto_new.txt` for manual review and is not part of the app build.
 
-_(Note: The examples given above are the relatively safe - there are (unfortunately) far worse examples to be found in the text)._
+## Publishing
 
-The implicit sexism in Plotto is more subtle, but the rigid structure of the books permits an interesting experiment. Since the "A" protagonist is male and the "B" protagonist is female, we can swap the two roles and see if any of the resulting text sounds a bit "odd".
+GitHub Actions rebuilds and verifies the source, runs Python and JavaScript tests, checks that generated files are committed, and publishes through the existing Jekyll/GitHub Pages workflow. `CNAME` retains `plotto.tedt.org`. Build tools and tests are excluded from the published Jekyll output.
 
-To experiment with this, you can use the [gender-swapped version of Plotto](https://garykac.github.io/plotto/plotto-fm.html). The content is exactly the same as the original, except that "A" and "B" are swapped, along with any gendered terms ("him/her", "husband/wife", ...) in the text.
+The app runs entirely in the browser. Google Fonts supplies typography; the collection itself is served from this repository. The generator makes no external generation requests and keeps character names in browser state and the optional shared link.
 
-You can also choose the gender-swapped version from the `AB` dropdown menu at the top of the page.
+## Shared TedT.org navigation
 
-## Plotto in Print
+The global header loads `https://tedt.org/assets/global-header/v1/header.js`. Menu changes belong in the TedT.org repository. Local fallback links and the appearance bootstrap keep navigation usable while loading. The `tedt-appearance` cookie and shared header synchronize appearance.
 
-Physical copies of the original books are rare:
+The reader build uses `scripts/templates/global-header.html`. Keep that fragment identical in the generator and guide; verification checks all four pages. Global navigation stays separate from Plotto’s application controls.
 
-> **Plotto, A New Method of Plot Suggestion for Writers of Creative Fiction**  
-> by William Wallace Cook  
-> Ellis Publishing Company, Battle Creek, Michigan
+## Credits
 
-But it has been reprinted a few times recently:
+William Wallace Cook wrote the original book, published in 1928. The Internet Archive digitized it in 2012, and Gary Kacmarcik cleaned and annotated the digital text in 2016. This application builds on [Gary’s original project](https://github.com/garykac/plotto).
 
-> [**Plotto: The Master Book of All Plots**](https://www.amazon.com/Plotto-Master-Book-All-Plots/dp/1941040551)  
-> by William Wallace Cook, foreword by Paul Collins  
-> Tin House Books; Portland, Oregon  
-> 978-1935639183 (hardback, 2011) 978-1941040553 (paperback, 2016)  
-
-> [**Plotto: The Classic Plot Suggestion Tool for Writers of Creative Fiction**](https://www.amazon.com/Plotto-Classic-Suggestion-Writers-Creative/dp/0981928471)  
-> by William Wallace Cook, foreword by Robert Plamondon  
-> Norton Creek Press; Blodgett, Oregon  
-> 978-0981928470 (paperback, 2011)  
-
-In addition, there is also:
-
-> **Plots Unlimited**  
-> by Tom Sawyer, Arthur David Weingarten  
-> Ashleywilde, Inc; Malibu, California  
-> 978-0962747601 (paperback, 1995)  
-
-which is a blatantly bowdlerized version of the Cook's work, that makes only a passing reference to Plotto ("The authors wish to acknowledge William Wallace Cook's Plotto" in small type on the copyright page).
-
-## Articles about Plotto:
-
-* ['Plotto': An Algebra Book For Fiction Writing](https://www.npr.org/2012/02/19/146941343/plotto-an-algebra-book-for-fiction-writing)
-* [Plotto and Randomized Plot Generation](http://www.story-games.com/forums/discussion/15897/plotto-and-randomized-plot-generation)
-
-## Donate
-
-If you find this project useful, consider [donating to the Internet Archive at archive.org](https://archive.org/donate/). The [Internet Archive](https://archive.org/) hosts digital copies of millions of books (including Plotto) that you can access and download for free. The digital version of Plotto used to start this project was downloaded from the [Internet Archive](https://archive.org/).
-
-## Shared TedT.org Navigation
-
-The global header loads `https://tedt.org/assets/global-header/v1/header.js`. Menu changes belong in the TedT.org repository, rather than in this site. The small local fallback and pre-paint bootstrap keep navigation and appearance usable while loading. The shared `tedt-appearance` cookie and `tedt:theme-change` event synchronize appearance; keep local site navigation and application controls separate. See https://tedt.org/docs/global-header.md for the embed contract.
+The Internet Archive hosts the scans used by this project. Consider [supporting its work](https://archive.org/donate/).

@@ -1,10 +1,14 @@
+#!/usr/bin/env python3
 import os.path
 import re
 import subprocess
 import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
 
 def error(msg):
-	print 'Error: %s' % (msg)
+	print('Error: %s' % (msg))
 	sys.exit(1)
 
 class Parser():
@@ -144,12 +148,12 @@ class Parser():
 			error('File "%s" doesn\'t exist' % src)
 
 		try:
-			self.infile = open(src, 'r')
+			self.infile = open(src, 'r', encoding='utf-8')
 		except IOError as e:
 			error('Unable to open "%s" for reading: %s' % (src, e))
 
 		try:
-			self.outfile = open(dst, 'w')
+			self.outfile = open(dst, 'w', encoding='utf-8')
 		except IOError as e:
 			error('Unable to open "%s" for writing: %s' % (dst, e))
 
@@ -162,8 +166,8 @@ class Parser():
 
 
 def main():
-	infilename = '../plotto.txt'
-	outfilename = '../plotto_new.txt'
+	infilename = ROOT / 'plotto.txt'
+	outfilename = ROOT / 'plotto_new.txt'
 
 	parser = Parser()
 	parser.process(infilename, outfilename)

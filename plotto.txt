@@ -2610,7 +2610,7 @@ POST: (170) (172) (319)
 
 Conflict{139}
 
-PRE: (885a ch A to A-2) (997a) (885a ch B to A-2; 097)
+PRE: (885a ch A to A-2) (997a) (885a ch B to A-2; 997)
 A discovers that his best friend, A-2, is in love with B, the girl A is seeking to marry
 POST: (157 ch A-3 to A-2) (174 ch A-3 to A-2) (122 ch A-3 to A-2) (75a, b ch A-3 to A-2) (175 ch A-3 to A-2) (350 ch A-3 to A-2)
 
@@ -3312,7 +3312,7 @@ Conflict{214}
 PRE: (24a, b, c) (22a)
 A, in love with B, is persuaded by Old Dry-as-Dust, the sage, AX, to turn from
 love as from something evil
-POST: (82a, b) (205) (352a, b) (3633)
+POST: (82a, b) (205) (352a, b) (363a)
 
 -- page 45
 
@@ -5647,7 +5647,7 @@ POST: (396) (501) (539b) (1395)
 Conflict{461}
 
 PRE: (239) (341) (585b)
-A is deeply in love with his wife, B * A faces failure in business (4913) (606)
+A is deeply in love with his wife, B * A faces failure in business (491b) (606)
 (631) (747) —a failure which, he knows, will bring disaster to his married happiness **
 POST: (484b; 770b, c) (505)
 

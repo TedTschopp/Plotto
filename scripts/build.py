@@ -1,15 +1,18 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Run this script from within the scripts/ directory.
+# Run from any directory; source and configuration paths are resolved explicitly.
 
 import getopt
 import os.path
 import re
 import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
 
 def error(msg):
-	print 'Error: %s' % (msg)
+	print('Error: %s' % (msg))
 	sys.exit(1)
 
 # These terms are bidirectional unless marked with an '*'. In this case, then '*'ed
@@ -121,7 +124,6 @@ class Parser():
 
 		self.js_files = []
 		self.css_files = []
-		self.enable_bootstrap = True
 		
 		# Dict with count of all words found in doc.
 		self.dict = {}
@@ -186,20 +188,17 @@ class Parser():
 		self.B = ab[1]
 
 	def setJavascript(self, js):
-		if isinstance(js, basestring):
+		if isinstance(js, str):
 			self.js_files = [js]
 		else:
 			self.js_files = js
 		
 	def setCss(self, css):
-		if isinstance(css, basestring):
+		if isinstance(css, str):
 			self.css_files = [css]
 		else:
 			self.css_files = css
 
-	def enableBootstrap(self, enable):
-		self.enableBootstrap = enable
-			
 	def parse_links(self, links):
 		hyperlinks = ''
 		while len(links) != 0:
@@ -362,16 +361,17 @@ class Parser():
 
 		if self.format_next_line:
 			id = ''
+			tag = 'h1' if self.format_next_line == 'book_title' else ('h2' if self.format_next_line in ['title', 'subtitle'] else 'div')
 			if self.next_id:
 				id = ' id="{0}"'.format(self.next_id)
-			self.outfile.write('<div{2} class="{0}">{1}</div>\n'.format(self.format_next_line, line, id))
+			self.outfile.write('<{3}{2} class="{0}">{1}</{3}>\n'.format(self.format_next_line, line, id, tag))
 			self.format_next_line = None
 			self.next_id = None
 			return
 
 		if self.format_links:
 			prefix = ''
-			m = re.match('^\s*\(([a-d])\) (.*)$', line)
+			m = re.match(r'^\s*\(([a-d])\) (.*)$', line)
 			if m:
 				prefix = '<span class="subid">{0}</span>'.format(m.group(1))
 				line = m.group(2)
@@ -437,77 +437,58 @@ class Parser():
 				return
 
 			if not self.in_conflict:
-				print line
+				print(line)
 				assert(self.in_conflict)
 			self.text.append(line)
 
 	def write_html_header(self):
-		self.outfile.write('<!DOCTYPE html>\n')
-		self.outfile.write('<html lang="en">\n')
-		self.outfile.write('<head>\n')
-		self.outfile.write('\t<meta charset="utf-8" />\n')
-		self.outfile.write('\t<meta http-equiv="X-UA-Compatible" content="IE=edge" />\n')
-		self.outfile.write('\t<meta name="viewport" content="width=device-width, initial-scale=1" />\n')
-		self.outfile.write('\t<title>Plotto</title>\n')
-		if self.enable_bootstrap:
-			self.outfile.write('\t<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous" />\n')
+		self.outfile.write('<!DOCTYPE html>\n<html lang="en">\n<head>\n')
+		self.outfile.write('<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n')
+		self.outfile.write('<title>Plotto · Read the book</title>\n<meta name="description" content="Explore all 1,462 Plotto conflicts and follow linked suggestions for your next story.">\n')
+		self.outfile.write('<script src="js/tedt-theme-init.js"></script>\n<link rel="stylesheet" href="css/tedt-header-embed.css">\n')
 		for css in self.css_files:
-			self.outfile.write('\t<link rel="stylesheet" type="text/css" href="css/%s" />\n' % css)
-		self.outfile.write('\t<link href="https://fonts.googleapis.com/css?family=Old+Standard+TT:400,400italic,700" rel="stylesheet" type="text/css" />\n')
+			self.outfile.write('<link rel="stylesheet" href="css/%s">\n' % css)
+		self.outfile.write('<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">\n')
 		for js in self.js_files:
-			self.outfile.write('\t<script src="js/%s" ></script>\n' % js)
-		self.outfile.write('</head>\n')
-		self.outfile.write('<body>\n')
-
+			self.outfile.write('<script defer src="js/%s"></script>\n' % js)
+		self.outfile.write('</head>\n<body>\n<a class="skip-link" href="#book-content">Skip to book</a>\n')
+		self.outfile.write((ROOT / 'scripts/templates/global-header.html').read_text(encoding='utf-8'))
 		self.write_navbar()
-
-		self.outfile.write('<div class="container">\n')
+		self.outfile.write('<main id="book-content" class="container">\n')
+		self.outfile.write('<p class="edition-note">Original 1928 text · %s · <a href="./#how-it-works">How to use Plotto</a></p>\n' % ('A is female, B is male' if self.A == 'f' else 'A is male, B is female'))
 		self.outfile.write('<div class="frontmatter">\n')
 
 	def write_html_footer(self):
-		self.outfile.write('</div>\n')
-		if self.enable_bootstrap:
-			self.outfile.write('<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>\n')
-			self.outfile.write('<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>\n')
-		self.outfile.write('</body>\n')
-		self.outfile.write('</html>\n')
+		self.outfile.write('</main>\n<footer class="book-footer"><a href="./">Back to the plot generator</a> · William Wallace Cook, 1928</footer>\n</body>\n</html>\n')
 
 	def write_navbar(self):
-		self.outfile.write('<nav class="navbar navbar-inverse navbar-static-top">\n')
-		self.outfile.write('\t<div class="container">\n')
-		self.outfile.write('\t\t<div class="navbar-header">\n')
-		self.outfile.write('\t\t\t<a class="navbar-brand" href="./plotto.html">Plotto - A New Method of Plot Suggestion for Writers of Creative Fiction</a>\n')
-		self.outfile.write('\t\t</div>\n')
-
-		self.outfile.write('\t\t<div class="collapse navbar-collapse" id="navbar-right">\n')
-		self.outfile.write('\t\t<ul class="nav navbar-nav navbar-right">\n')
-		self.outfile.write('\t\t<li class="dropdown">\n')
-		self.outfile.write('\t\t\t<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">AB <span class="caret"></span></a>\n')
-		self.outfile.write('\t\t\t<ul class="dropdown-menu">\n')
-		self.outfile.write('\t\t\t\t<li><a href="plotto-mf.html">A=male, B=female</a></li>\n')
-		self.outfile.write('\t\t\t\t<li><a href="plotto-fm.html">A=female, B=male</a></li>\n')
-		self.outfile.write('\t\t\t</ul>\n')
-		self.outfile.write('\t\t</li>\n')
-		self.outfile.write('\t\t</ul>\n')
-		self.outfile.write('\t\t</div>\n')
-
-		self.outfile.write('\t</div>\n')
-		self.outfile.write('</nav>\n')
+		self.outfile.write('<nav class="book-nav" aria-label="Plotto"><a href="./">Plot generator</a><details><summary>Book contents</summary><div class="contents-links">')
+		for anchor, label in [('a-clauses', 'Protagonists'), ('b-clauses', 'Story actions'), ('c-clauses', 'Endings'), ('index-b-clause-conflicts', 'Conflict index'), ('character-symbols', 'Character symbols')]:
+			self.outfile.write('<a href="#%s">%s</a>' % (anchor, label))
+		self.outfile.write('</div></details>')
+		for edition, label in [('mf', 'Original roles'), ('fm', 'Reversed roles')]:
+			current = ' aria-current="page"' if edition == self.A + self.B else ''
+			self.outfile.write('<a data-edition-link href="plotto-%s.html"%s>%s</a>' % (edition, current, label))
+		self.outfile.write('<button type="button" id="book-random" hidden>Random conflict</button></nav>\n')
 
 	def write_group_header(self, name):
-		self.outfile.write('\n<div class="group">{0}</div>\n'.format(name))
+		if self.in_conflict_div:
+			self.write_conflict_footer()
+		self.outfile.write('\n<h2 class="group">{0}</h2>\n'.format(name))
 
 	def write_subgroup_header(self, name):
 		if name != '':
-			self.outfile.write('\n<div class="subgroup">{0}</div>\n'.format(name))
+			self.outfile.write('\n<h3 class="subgroup">{0}</h3>\n'.format(name))
 
 	def write_bclause_header(self, id, name):
-		self.outfile.write('\n<div class="bclause">({0}) {1}</div>\n'.format(id, name))
+		if self.in_conflict_div:
+			self.write_conflict_footer()
+		self.outfile.write('\n<h3 class="bclause">({0}) {1}</h3>\n'.format(id, name))
 
 	def write_conflict_header(self):
 		self.outfile.write('\n<div class="conflict" id="{0}">\n'.format(self.id))
 		self.in_conflict_div = True
-		self.outfile.write('\n<div class="conflictid">{0}</div>\n'.format(self.id))
+		self.outfile.write('\n<h4 class="conflictid">{0}</h4>\n'.format(self.id))
 
 	def write_conflict_footer(self):
 		self.outfile.write('\n</div>\n')
@@ -517,7 +498,8 @@ class Parser():
 		prefix = ''
 		if subid != '':
 			prefix = '<span class="subid">' + subid + '</span> '
-		self.outfile.write('\n<div class="prelinks">{0}{1}</div>\n'.format(prefix, links))
+		anchor = ' id="%s%s"' % (self.id, subid) if subid else ''
+		self.outfile.write('\n<div class="prelinks"{2}>{0}{1}</div>\n'.format(prefix, links, anchor))
 
 	def write_conflict_body(self, links):
 		self.outfile.write('<div class="desc">')
@@ -582,7 +564,7 @@ class Parser():
 			wordNew = 'his'
 			if self.her_info != None:
 				if len(self.her_info) == 0:
-					print self.page, self.id, 'missing her info'
+					print(self.page, self.id, 'missing her info')
 				type = self.her_info.pop(0)
 				if type == 'obj':
 					wordNew = 'him'
@@ -612,7 +594,7 @@ class Parser():
 		# Preprocess "ladies'" so we can convert to "gentlemen's".
 		line = line.replace("ladies'", "ladies_poss");
 		# Note: — is emdash
-		words = re.split('([ .,:;—\'"\(\)\[\]\{\}])', line)
+		words = re.split(r"([ .,:;—'\"()\[\]{}])", line)
 		for w in words:
 			#if self.id == '1289':
 			#	print self.subid, w
@@ -625,12 +607,12 @@ class Parser():
 			error('File "%s" doesn\'t exist' % src)
 
 		try:
-			infile = open(src, 'r')
+			infile = open(src, 'r', encoding='utf-8')
 		except IOError as e:
 			error('Unable to open "%s" for reading: %s' % (src, e))
 
 		try:
-			outfile = open(dst, 'w')
+			outfile = open(dst, 'w', encoding='utf-8')
 		except IOError as e:
 			error('Unable to open "%s" for writing: %s' % (dst, e))
 
@@ -667,7 +649,7 @@ class Parser():
 	def write_dict(self):
 		dst = 'dict.txt'
 		try:
-			outfile = open(dst, 'w')
+			outfile = open(dst, 'w', encoding='utf-8')
 		except IOError as e:
 			error('Unable to open "%s" for writing: %s' % (dst, e))
 
@@ -677,16 +659,16 @@ class Parser():
 		outfile.close()
 
 def usage():
-	print 'Usage: %s <options>' % sys.argv[0]
-	print 'where <options> are:'
-	print '  --config <config-file-name>'
-	print '  --dict'  # write word frequency dict
-	print '  --verbose'  # verbose debug output
+	print('Usage: %s <options>' % sys.argv[0])
+	print('where <options> are:')
+	print('  --config <config-file-name>')
+	print('  --dict')  # write word frequency dict
+	print('  --verbose')  # verbose debug output
 	
 def load_config(file):
 	config = {}
 	try:
-		config_file = open(file, 'r')
+		config_file = open(file, 'r', encoding='utf-8')
 	except IOError as e:
 		error('Unable to open config file "%s": %s' % (file, e))
 	
@@ -729,30 +711,32 @@ def main():
 			verbose = True
 
 	if config_file:
+		config_file = Path(config_file)
+		if not config_file.exists():
+			config_file = ROOT / 'scripts' / config_file
 		config = load_config(config_file)
+		config['output_file'] = str((config_file.resolve().parent / config['output_file']).resolve())
 	else:
 		# Default configuration
 		config = {}
-		config['output_file'] = '../plotto.html'
+		config['output_file'] = str(ROOT / 'plotto-mf.html')
 		config['gender_swap'] = False
 		config['javascript'] = 'random.js'
 		config['css'] = 'plotto.css'
-		config['include_bootstrap'] = True
 	#print config
 		
 	# The raw input file (with the Plotto text).
-	infilename = '../plotto.txt'
+	infilename = str(ROOT / 'plotto.txt')
 	gender = 'mf'
 	if config['gender_swap']:
 		gender = 'fm'
 
-	print 'Building', config['output_file'], '...'
+	print('Building', config['output_file'], '...')
 	
 	parser = Parser()
 	parser.setAB(gender)
 	parser.setJavascript(config['javascript'])
 	parser.setCss(config['css'])
-	parser.enableBootstrap(config['include_bootstrap'])
 	parser.process(infilename, config['output_file'])
 	if write_dict:
 		parser.write_dict()
