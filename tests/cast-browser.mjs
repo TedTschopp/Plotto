@@ -79,21 +79,24 @@ try {
   await page.locator('#edition').selectOption('mf');
   await page.waitForFunction(() => document.querySelector('.main-stage .story-ref')?.getAttribute('href').startsWith('plotto-mf'));
   await generate('813');
-  await page.getByRole('link', {name: 'Name supporting characters'}).click();
+  await page.getByRole('link', {name: 'Name characters'}).click();
   const son = page.getByLabel('Name for SN (optional)', {exact: true});
   assert.equal(await son.isVisible(), true);
+  assert.equal(await son.evaluate((input) => input.closest('details').id), 'character-names');
+  assert.equal(await page.locator('#name-a').evaluate((input) => input.closest('details').id), 'character-names');
+  assert.equal(await page.locator('#name-b').evaluate((input) => input.closest('details').id), 'character-names');
   assert.equal(await page.locator('#role-SN').innerText(), 'son');
   await son.focus();
-  await page.locator('#supporting-cast').screenshot({path: 'test-results/conflict-813-SN.png'});
+  await page.locator('#character-names').screenshot({path: 'test-results/conflict-813-SN.png'});
   await son.fill('Alex');
   assert.match(await main().innerText(), /son, Alex,/);
   await page.reload({waitUntil: 'domcontentloaded'});
   await ready();
   assert.equal(await page.getByLabel('Name for SN (optional)', {exact: true}).inputValue(), 'Alex');
+  await page.locator('summary').filter({hasText: 'Names & a starting conflict'}).click();
   await page.locator('#edition').selectOption('fm');
   await page.getByLabel('Name for D (optional)', {exact: true}).waitFor();
   assert.equal(await page.locator('#role-D').innerText(), 'daughter');
-  await page.locator('summary').filter({hasText: 'Names & a starting conflict'}).click();
   await generate('269');
   assert.equal(await rival().inputValue(), name);
   // Capture the new fields in both responsive layouts.

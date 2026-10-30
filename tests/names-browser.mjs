@@ -67,6 +67,7 @@ try {
   assert.equal(await sharedPage.locator('#name-A-3').inputValue(), 'Their rival');
   assert.equal(await sharedPage.locator('#name-F-B').inputValue(), '');
   assert.deepEqual(await savedNames(sharedPage), cast);
+  await options(sharedPage);
   await sharedPage.locator('#name-A-3').fill('My new rival');
   assert.deepEqual(await savedNames(sharedPage), {...cast, 'A-3': 'My new rival'});
   await sharedPage.close();

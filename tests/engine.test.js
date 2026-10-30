@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {applyOperations, replaceTogether, selectText, cleanText, generateOutline, renderOutline,
   stageOptions, seededRandom, namedText, outlineText, outlineCharacters, characterRole, sharedState,
-  MAX_SHARED_HASH_LENGTH} from '../js/engine.js';
+  MAX_SHARED_HASH_LENGTH, endingClauses, masterplotText, masterplotConnection} from '../js/engine.js';
 
 const books = ['mf', 'fm'].map((edition) => JSON.parse(readFileSync(new URL(`../data/plotto-${edition}.json`, import.meta.url))));
 const corrections = JSON.parse(readFileSync(new URL('../data/source-corrections.json', import.meta.url))).slice(3);
@@ -96,6 +96,60 @@ test('compound references preserve sequence and alternatives choose one branch',
   assert.equal(result.entries.length, 2);
   assert.equal(result.entries[0].id, 688);
   assert.ok([307, 197, 973].includes(result.entries[1].id));
+});
+
+test('automatic masterplots use a neutral person and an indexed ending or an open outcome', () => {
+  for (const book of books) {
+    for (const main of ['813', '542', '75a', '364d']) {
+      for (let seed = 0; seed < 8; seed++) {
+        const outline = generateOutline(book, {main}, seededRandom(seed));
+        assert.equal(outline.a.id, 15);
+        const specific = endingClauses(outline, book).filter((id) => id !== 15);
+        assert.equal(outline.c.id, specific.length === 1 ? specific[0] : 15);
+        assert.equal(outline.b.id, outline.conflict.bClause);
+        assert.ok(masterplotText(outline).endsWith('.'));
+      }
+    }
+  }
+});
+
+test('a requested outcome prefers a book-linked ending and unmatched outcomes remain explicit', () => {
+  for (const book of books) {
+    const matched = generateOutline(book, {main: '813', a: 6, c: 9}, seededRandom(12));
+    assert.equal(matched.a.id, 6);
+    assert.equal(matched.after.entries.at(-1).id, 881);
+    assert.ok(endingClauses(matched, book).includes(9));
+    assert.match(masterplotConnection(matched, book), /terminal-conflict index/);
+    const planned = generateOutline(book, {main: '813', c: 8}, seededRandom(12));
+    assert.equal(planned.c.id, 8);
+    assert.match(masterplotConnection(planned, book), /C8 is a planned outcome/);
+    const excerpt = {...matched, after: {...matched.after,
+      entries: [{...matched.after.entries.at(-1), complete: false}]}};
+    assert.deepEqual(endingClauses(excerpt, book), []);
+    assert.match(masterplotConnection(excerpt, book), /planned outcome/);
+  }
+});
+
+test('automatic outcomes remain open when the book lists multiple specific endings', () => {
+  const book = {...books[0], terminalClauses: Object.fromEntries(Object.keys(books[0].terminalClauses).map((key) => [key, [1, 9]]))};
+  const outline = generateOutline(book, {main: '813'}, seededRandom(12));
+  assert.equal(outline.c.id, 15);
+  const chosen = generateOutline(book, {main: '813', c: 9}, seededRandom(12));
+  assert.match(masterplotConnection(chosen, book), /several outcomes/);
+});
+
+test('B62 is universal and legacy saved masterplots retain their chosen clauses', () => {
+  const book = books[0];
+  const outline = generateOutline(book, {group: 'Enterprise', b: 62}, seededRandom(12));
+  assert.equal(outline.b.id, 62);
+  assert.equal(outline.conflict.group, 'Enterprise');
+  assert.deepEqual(renderOutline(book, outline.state), outline);
+  const legacy = {...outline.state, a: 13, c: 8};
+  delete legacy.b;
+  const restored = renderOutline(book, legacy);
+  assert.equal(restored.a.id, 13);
+  assert.equal(restored.c.id, 8);
+  assert.equal(restored.b.id, restored.conflict.bClause);
 });
 
 test('names and text export preserve Unicode and do not rewrite relationship symbols', () => {

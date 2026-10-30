@@ -79,7 +79,10 @@ summary { font-size: .8125rem; font-weight: 600; min-height: 32px; }
 .cast-link { display: inline-block; font-size: .75rem; margin: -10px 0 20px; }
 .quiet-label { color: var(--muted); font-size: .6875rem; max-width: 140px; text-align: right; }
 .masterplot { padding: 16px 20px; background: var(--wash); border-radius: .375rem; margin-bottom: 24px; }
-.masterplot > p { color: var(--muted); font-size: .6875rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 8px; }
+.masterplot > p:first-child { color: var(--muted); font-size: .6875rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 8px; }
+.masterplot .masterplot-sentence { font: 400 1.125rem/1.5 var(--font-story); margin-bottom: 12px; }
+.masterplot-parts summary { font-size: .75rem; min-height: 28px; }
+.masterplot .masterplot-connection { font-size: .75rem; color: var(--muted); margin-top: 10px; }
 .masterplot ol { list-style: none; margin: 0; padding: 0; }
 .masterplot li { font-size: .8125rem; line-height: 1.7; margin-block: 4px; display: flex; align-items: baseline; gap: 12px; }
 .clause-letter { color: var(--accent); font: 700 .875rem var(--font-story); }
@@ -105,9 +108,9 @@ summary { font-size: .8125rem; font-weight: 600; min-height: 32px; }
 .character-key dl { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 6px 18px; font-size: .75rem; }
 .character-key dt { font-weight: 600; overflow-wrap: anywhere; }
 .character-key dd { margin: 0; color: var(--muted); overflow-wrap: anywhere; }
-.cast-names { border-top: 1px solid var(--line); padding-top: 20px; margin-bottom: 24px; }
-.cast-names h3 { font-size: 1.25rem; }
-.cast-name-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 20px; }
+.cast-names { margin-top: 18px; }
+.cast-names h3 { font: 600 .8125rem var(--font-ui); color: var(--muted); }
+.cast-name-grid { display: grid; grid-template-columns: minmax(0, 1fr); }
 .cast-name-grid .help { margin-top: 5px; }
 .browse-section { padding-top: 64px; }
 .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 20px; }

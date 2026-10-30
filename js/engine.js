@@ -169,7 +169,8 @@ function resolve(expression, index, excluded, random) {
   const variant = pick(variantsFor(expression, index), random);
   const adapted = applyOperations(selectText(variant.text, expression), expression.operations);
   return [{id: conflict.id, variant: variant.id, reference: expression.label,
-    text: cleanText(adapted.text), notes: [...adapted.notes, ...expression.notes], correctionId: expression.correctionId ?? null}];
+    text: cleanText(adapted.text), notes: [...adapted.notes, ...expression.notes], correctionId: expression.correctionId ?? null,
+    complete: !expression.section && !expression.numbers.length}];
 }
 
 export function stageOptions(book, mainKey, direction, excludedIds = []) {
@@ -205,7 +206,7 @@ export function renderOutline(book, state) {
   const after = renderStage(book, state, 'after', before.entries.map((entry) => entry.id));
   return {state, conflict,
     a: book.clauses.a.find((clause) => clause.id === state.a),
-    b: book.clauses.b.find((clause) => clause.id === conflict.bClause),
+    b: book.clauses.b.find((clause) => clause.id === (state.b ?? conflict.bClause)),
     c: book.clauses.c.find((clause) => clause.id === state.c),
     main: {id: conflict.id, variant: variant.id, reference: state.main, text: cleanText(variant.text), notes: []},
     before, after};
@@ -222,17 +223,57 @@ export function generateOutline(book, options = {}, random = Math.random) {
     if (!variant) throw new Error(`Conflict ${conflict.id} has no variant ${match[2]}.`);
   } else {
     const candidates = book.conflicts.filter((c) => (!options.group || c.group === options.group) &&
-      (!options.b || c.bClause === Number(options.b)));
+      (!options.b || Number(options.b) === 62 || c.bClause === Number(options.b)));
     if (!candidates.length) throw new Error('No conflicts match this theme and story action. Choose another action or use any theme.');
     conflict = pick(candidates, random);
     variant = pick(conflict.variants, random);
   }
   const state = {v: 1, edition: book.edition, hash: book.sourceHash, main: `${conflict.id}${variant.id}`,
-    a: Number(options.a) || pick(book.clauses.a, random).id,
-    c: Number(options.c) || pick(book.clauses.c, random).id,
+    a: Number(options.a) || 15,
+    c: Number(options.c) || 15,
+    ...(Number(options.b) === 62 ? {b: 62} : {}),
     before: {seed: Math.floor(random() * 4294967296)}, after: {seed: Math.floor(random() * 4294967296)},
     names: normalizeNames(options.names, book)};
-  return renderOutline(book, state);
+  let outline = renderOutline(book, state);
+  if (options.c && Number(options.c) !== 15) {
+    const matching = outline.after.options.map((option) => renderOutline(book, {...state,
+      after: {...state.after, group: option.groupIndex}})).filter((candidate) => endingClauses(candidate, book).includes(state.c));
+    const unambiguous = matching.filter((candidate) => endingClauses(candidate, book).filter((id) => id !== 15).length === 1);
+    outline = pick(unambiguous.length ? unambiguous : matching, random) ?? outline;
+  } else if (!options.c) {
+    outline.state.c = automaticOutcome(outline, book);
+    outline = renderOutline(book, outline.state);
+  }
+  return outline;
+}
+
+export function endingClauses(outline, book) {
+  const ending = outline.after.entries.at(-1) ?? outline.main;
+  if (ending.complete === false) return [];
+  return book.terminalClauses?.[`${ending.id}${ending.variant}`] ?? [];
+}
+
+export function automaticOutcome(outline, book) {
+  const specific = endingClauses(outline, book).filter((id) => id !== 15);
+  return specific.length === 1 ? specific[0] : 15;
+}
+
+export function masterplotText(outline) {
+  const lowerFirst = (text) => text[0].toLowerCase() + text.slice(1);
+  return `${outline.a.text}, ${lowerFirst(outline.b.text)}, ${lowerFirst(outline.c.text)}.`;
+}
+
+export function masterplotConnection(outline, book) {
+  if (outline.c.id === 15) return 'C15 leaves the outcome open. Choose a specific outcome to give the story a tighter direction.';
+  const ending = outline.after.entries.at(-1) ?? outline.main;
+  if (endingClauses(outline, book).includes(outline.c.id)) {
+    if (endingClauses(outline, book).filter((id) => id !== 15).length > 1) {
+      return `The book indexes ${ending.id}${ending.variant} under several outcomes, including C${outline.c.id}. Interpret and adapt the situation to earn this particular ending.`;
+    }
+    return `The book lists ${ending.id}${ending.variant} under C${outline.c.id} in its terminal-conflict index. Adapt the intervening events to earn that ending.`;
+  }
+  const situation = outline.after.entries.length ? 'carry-on' : 'main conflict';
+  return `C${outline.c.id} is a planned outcome. The current ${situation} is not indexed as that ending; develop a bridge, choose another carry-on, or change the outcome.`;
 }
 
 export function validateState(state, book) {
@@ -241,6 +282,7 @@ export function validateState(state, book) {
     throw new Error('This saved outline is invalid or uses an older book dataset. Generate a new outline below.');
   }
   getMain(book, state.main);
+  if (state.b !== undefined && state.b !== 62) throw new Error('This outline contains an invalid masterplot action.');
   for (const direction of ['before', 'after']) {
     const stage = state[direction];
     if (!stage || !Number.isInteger(stage.seed) || stage.seed < 0 || stage.seed > 4294967295 ||
@@ -268,7 +310,9 @@ export function namedNote(note, names) {
 
 export function outlineText(outline, book, title = '') {
   const {state} = outline;
-  const lines = ['PLOTTO · A story outline', '', `${outline.a.text} / ${outline.b.text} / ${outline.c.text}`, ''];
+  const lines = ['PLOTTO · A story outline', '', masterplotText(outline),
+    `Masterplot: A${outline.a.id} / B${outline.b.id} / C${outline.c.id}`, ''];
+  if (book) lines.push(masterplotConnection(outline, book), '');
   if (title.trim()) lines.splice(1, 0, `Title: ${title.trim()}`);
   const stages = [['Lead-up', outline.before.entries], ['Main conflict', [outline.main]], ['Carry-on', outline.after.entries]];
   for (const [label, entries] of stages) {

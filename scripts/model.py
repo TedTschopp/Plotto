@@ -180,7 +180,23 @@ def read_book(edition='mf', source_path=None):
     if variant is not None:
         raise ValueError('Unclosed conflict at end of source')
     annotate_corrections(book)
+    book['terminalClauses'] = terminal_clauses(source, book)
     return book
+
+
+def terminal_clauses(source, book):
+    """Use only exact existing variant references in the book's terminal index."""
+    keys = {f'{conflict["id"]}{variant["id"]}' for conflict in book['conflicts'] for variant in conflict['variants']}
+    index = source.split('-- page 195', 1)[-1] if '-- page 195' in source else ''
+    index = '\n'.join(line for line in index.splitlines() if not line.startswith('--'))
+    result = {}
+    for paragraph in re.split(r'\n\s*\n|\n(?=\(\d+\)\s)', index):
+        text = ' '.join(paragraph.split())
+        clause = re.match(r'^\((\d{1,2})\)\s+', text)
+        reference = re.search(r'(?<![\w-])(\d{1,4}[a-m]?)$', text)
+        if clause and 1 <= int(clause[1]) <= 15 and reference and reference[1] in keys:
+            result.setdefault(reference[1], set()).add(int(clause[1]))
+    return {key: sorted(values) for key, values in sorted(result.items())}
 
 
 def annotate_corrections(book):

@@ -8,6 +8,17 @@ from model import ROOT, parse_reference, parse_groups, edition_lines, read_book,
 
 
 class SourceRules(unittest.TestCase):
+    def test_terminal_index_keeps_exact_existing_variants_and_known_book_examples(self):
+        for edition in ['mf', 'fm']:
+            book = read_book(edition)
+            self.assertIn(9, book['terminalClauses']['364d'])
+            self.assertIn(1, book['terminalClauses']['281b'])
+            self.assertIn(14, book['terminalClauses']['246b'])
+            self.assertIn(9, book['terminalClauses']['881'])
+            keys = {f'{c["id"]}{v["id"]}' for c in book['conflicts'] for v in c['variants']}
+            self.assertTrue(set(book['terminalClauses']).issubset(keys))
+            self.assertTrue(all(1 <= clause <= 15 for values in book['terminalClauses'].values() for clause in values))
+
     def test_compound_and_alternative_references_keep_their_order(self):
         tree = parse_reference('688 -*; 307 or 197 ch B to B-3 or 973')
         self.assertEqual(tree['type'], 'sequence')
