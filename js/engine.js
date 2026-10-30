@@ -266,9 +266,10 @@ export function namedNote(note, names) {
   return note.startsWith('Editorial repair:') ? note : namedText(note, names);
 }
 
-export function outlineText(outline, book) {
+export function outlineText(outline, book, title = '') {
   const {state} = outline;
   const lines = ['PLOTTO · A story outline', '', `${outline.a.text} / ${outline.b.text} / ${outline.c.text}`, ''];
+  if (title.trim()) lines.splice(1, 0, `Title: ${title.trim()}`);
   const stages = [['Lead-up', outline.before.entries], ['Main conflict', [outline.main]], ['Carry-on', outline.after.entries]];
   for (const [label, entries] of stages) {
     lines.push(label.toUpperCase());

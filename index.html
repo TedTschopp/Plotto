@@ -40,6 +40,17 @@
     <p id="status" class="status" role="status" aria-live="polite">Loading the Plotto collection…</p>
     <button id="retry" type="button" hidden>Try loading again</button>
     <noscript><p class="notice">The generator needs JavaScript. You can read and follow the linked <a href="plotto-mf.html">original edition</a> or <a href="plotto-fm.html">reversed-role edition</a> without it.</p></noscript>
+    <section class="story-library" aria-labelledby="library-title">
+      <h2 id="library-title">Your stories</h2>
+      <p class="help">Give each story a title and choose one to continue. Each keeps its own outline, names and settings in this browser.</p>
+      <fieldset id="story-library-fields" disabled>
+        <div class="library-fields">
+          <div><label for="story-title">Story title</label><input id="story-title" maxlength="120" autocomplete="off" placeholder="Give this story a title"></div>
+          <div><label for="story-picker">Saved stories</label><select id="story-picker"><option value="">Choose a saved story</option></select></div>
+        </div>
+        <div class="library-actions"><button id="save-story" type="button">Save story</button><button id="new-story" type="button">New story</button><button id="copy-story" type="button">Save a copy</button></div>
+      </fieldset>
+    </section>
     <section id="workbench" class="workbench" aria-label="Plot generator">
       <form id="generator-form" class="controls">
         <fieldset id="generator-fields" disabled>

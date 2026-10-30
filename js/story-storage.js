@@ -2,7 +2,7 @@ import {validateState, MAX_SHARED_HASH_LENGTH} from './engine.js';
 
 export const CURRENT_STORY_KEY = 'plotto-current-story-v1';
 
-function storyControls(controls) {
+export function storyControls(controls) {
   const limits = {group: 64, b: 2, a: 2, c: 2, main: 5};
   const result = {};
   for (const [key, limit] of Object.entries(limits)) {

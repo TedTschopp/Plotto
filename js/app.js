@@ -1,13 +1,14 @@
 import {generateOutline, renderOutline, cleanText, namedText, namedNote, outlineText,
   outlineCharacters, characterRole, nameKey, sharedState, MAX_SHARED_HASH_LENGTH} from './engine.js';
 import {loadCharacterNames, saveCharacterNames} from './name-storage.js';
-import {loadCurrentStory, saveCurrentStory} from './story-storage.js';
+import {loadStoryLibrary, saveLibraryStory, activateLibraryStory, MAX_STORY_TITLE} from './story-library.js';
 
 const $ = (id) => document.getElementById(id);
 const cache = new Map();
 let book, outline, loading = 0, visibleResults = 12;
 let rememberedNames = {a: '', b: ''}, namesLoaded = false, nameStorageAvailable = true;
 let pendingRestore = null, storySaveMessage = '';
+let activeStoryId = null, storyRevision = 0, storyTitle = '';
 
 function element(tag, text, className) {
   const node = document.createElement(tag);
@@ -27,7 +28,75 @@ function showError(error) {
 function currentOptions() {
   return {group: $('theme').value, b: $('action').value, a: $('protagonist').value,
     c: $('ending').value, main: $('start-conflict').value,
-    names: {...rememberedNames, ...outline?.state.names, a: $('name-a').value, b: $('name-b').value}};
+    names: {...(outline?.state.names ?? rememberedNames), a: $('name-a').value, b: $('name-b').value}};
+}
+
+function renderLibrary() {
+  const loaded = loadStoryLibrary();
+  const picker = $('story-picker');
+  picker.replaceChildren(new Option('Choose a saved story', ''));
+  [...loaded.library.stories].sort((a, b) => b.updatedAt - a.updatedAt).forEach((story) => {
+    picker.append(new Option(`${story.title} · conflict ${story.state.main}`, story.id));
+  });
+  picker.value = activeStoryId || '';
+  picker.disabled = !outline || loaded.invalid || loaded.library.stories.length === 0;
+  if (document.activeElement !== $('story-title')) $('story-title').value = storyTitle;
+  $('outline-title').textContent = storyTitle.trim() || 'Your story outline';
+  $('story-memory-note').hidden = false;
+  if ($('story-memory-note').textContent !== storySaveMessage) $('story-memory-note').textContent = storySaveMessage;
+}
+
+function persistStory(copy = false) {
+  if (!outline || book?.edition !== $('edition').value) return false;
+  const title = copy ? `${(storyTitle.trim() || 'Untitled story').slice(0, 113)} (copy)` : storyTitle;
+  const result = saveLibraryStory(book, {id: copy ? null : activeStoryId, revision: copy ? 0 : storyRevision,
+    title, state: outline.state, controls: currentOptions()});
+  if (result.ok) {
+    activeStoryId = result.story.id;
+    storyRevision = result.story.revision;
+    storyTitle = result.story.title;
+    storySaveMessage = 'Your changes are saved automatically to this story in this browser.';
+    pendingRestore = null;
+    $('retry').hidden = true;
+  } else storySaveMessage = `${result.error} Your current work is still open.`;
+  renderLibrary();
+  return result.ok;
+}
+
+function saveBeforeLeaving() {
+  if (persistStory()) return true;
+  showError(new Error(storySaveMessage));
+  return false;
+}
+
+async function openStory(id) {
+  if (!id || id === activeStoryId) return;
+  if (!saveBeforeLeaving()) return;
+  const story = loadStoryLibrary().library.stories.find((entry) => entry.id === id);
+  if (!story) { showError(new Error('This saved story is no longer available. Your current work is still open.')); return; }
+  markChanged();
+  await loadEdition(story.state.edition, {...story, kind: 'library', activate: true});
+}
+
+function newStory() {
+  if (!saveBeforeLeaving()) return;
+  clearError();
+  try {
+    const next = generateOutline(book, {...currentOptions(), main: '', names: rememberedNames});
+    activeStoryId = null;
+    storyRevision = 0;
+    storyTitle = '';
+    $('story-title').value = '';
+    $('start-conflict').value = '';
+    outline = next;
+    $('name-a').value = next.state.names.a;
+    $('name-b').value = next.state.names.b;
+    markChanged();
+    render();
+    $('story-title').focus();
+    $('story-title').select();
+    status('A new story is ready. Your other stories are saved in the story picker.');
+  } catch (error) { showError(error); }
 }
 
 function markChanged() {
@@ -137,7 +206,7 @@ function updateName(key, value) {
 function renderNameMemory() {
   $('name-memory-note').textContent = nameStorageAvailable
     ? 'Character names are saved automatically in this browser for your next visit.'
-    : 'This browser could not save your changes. Names are available for this visit.';
+    : 'This browser could not save your name defaults. You can still use names in this outline.';
   $('clear-names').disabled = ![...Object.values(rememberedNames), ...Object.values(outline?.state.names ?? {})].some(Boolean);
 }
 
@@ -212,14 +281,11 @@ function render({updateCast = true, persist = true} = {}) {
   renderNameMemory();
   $('reader-link').href = `plotto-${book.edition}.html`;
   if (persist) {
-    const saved = saveCurrentStory(book, outline.state, currentOptions());
-    storySaveMessage = saved ? 'Your current story is saved automatically in this browser for your next visit.'
-      : 'This browser could not save your story. Copy a link to keep this outline.';
+    persistStory();
     pendingRestore = null;
     $('retry').hidden = true;
   }
-  $('story-memory-note').hidden = false;
-  if ($('story-memory-note').textContent !== storySaveMessage) $('story-memory-note').textContent = storySaveMessage;
+  if (!persist) renderLibrary();
 }
 
 function generate(overrides = {}) {
@@ -331,11 +397,14 @@ function restoreControls(restore) {
 }
 
 async function loadEdition(edition, restore = null) {
+  const previous = outline && restore?.activate ? {book, outline, controls: currentOptions(),
+    id: activeStoryId, revision: storyRevision, title: storyTitle, message: storySaveMessage} : null;
   const request = ++loading;
   pendingRestore = restore;
   clearError();
   $('edition').value = edition;
   $('generator-fields').disabled = true;
+  $('story-library-fields').disabled = true;
   $('search').disabled = true;
   $('browse-theme').disabled = true;
   $('retry').hidden = true;
@@ -372,6 +441,7 @@ async function loadEdition(edition, restore = null) {
     populateControls();
     $('edition').value = edition;
     $('generator-fields').disabled = false;
+    $('story-library-fields').disabled = false;
     $('generator-fields').querySelectorAll('input, select, button').forEach((control) => { control.disabled = false; });
     $('search').disabled = false;
     $('browse-theme').disabled = false;
@@ -382,16 +452,27 @@ async function loadEdition(edition, restore = null) {
       let restored;
       try { restored = renderOutline(book, restore.state); }
       catch (error) {
-        if (restore.kind === 'shared') throw error;
+        if (restore.kind === 'shared' || previous) throw error;
+        activeStoryId = null;
+        storyRevision = 0;
+        storyTitle = '';
         generate();
-        status('Your saved story could not be restored with this collection. A new outline is shown, using your saved character names.');
+        status('This saved story could not be restored with this collection. It is still in your library, and a new working story is shown.');
       }
       if (restored) {
+        if (restore.activate) {
+          const activated = activateLibraryStory(restore.id, restore.revision);
+          if (!activated.ok) throw new Error(activated.error);
+        }
         outline = restored;
+        activeStoryId = restore.kind === 'library' ? restore.id : null;
+        storyRevision = restore.kind === 'library' ? restore.revision : 0;
+        storyTitle = restore.kind === 'library' ? restore.title :
+          (typeof restore.state.title === 'string' ? restore.state.title.replace(/[\r\n\t]+/g, ' ').trim().slice(0, MAX_STORY_TITLE) : '') || 'Shared story';
         restoreControls(restore);
         storySaveMessage = restore.kind === 'shared'
-          ? 'This shared story will be saved in this browser when you make a change.'
-          : 'Your current story is saved automatically in this browser for your next visit.';
+          ? 'This shared story is a separate draft. Save it or make a change to add it to your stories.'
+          : 'Your changes are saved automatically to this story in this browser.';
         render({persist: false});
         status(`${restore.kind === 'shared' ? 'Shared outline' : 'Your last story'} restored from conflict ${restore.state.main}.`);
         pendingRestore = null;
@@ -406,6 +487,26 @@ async function loadEdition(edition, restore = null) {
     renderSearch();
   } catch (error) {
     if (request !== loading) return;
+    if (previous) {
+      book = previous.book;
+      outline = previous.outline;
+      activeStoryId = previous.id;
+      storyRevision = previous.revision;
+      storyTitle = previous.title;
+      storySaveMessage = previous.message;
+      $('edition').value = book.edition;
+      populateControls();
+      restoreControls({state: outline.state, controls: previous.controls});
+      $('generator-fields').disabled = false;
+      $('generator-fields').querySelectorAll('input, select, button').forEach((control) => { control.disabled = false; });
+      $('search').disabled = false;
+      $('browse-theme').disabled = false;
+      $('outline-content').inert = false;
+      $('supporting-cast').inert = false;
+      $('search-results').inert = false;
+      render({persist: false});
+    }
+    $('story-library-fields').disabled = !outline;
     $('outline').setAttribute('aria-busy', 'false');
     $('retry').hidden = false;
     // Keep edition selection available even if one of the datasets cannot load.
@@ -414,14 +515,33 @@ async function loadEdition(edition, restore = null) {
       control.disabled = control.id !== 'edition' && book?.edition !== edition;
     });
     showError(error);
-    status('You can still explore both linked editions using “Read the book.”');
+    status(previous ? 'The selected story could not be opened. Your current story is still open.'
+      : 'You can still explore both linked editions using “Read the book.”');
   }
 }
 
 $('generator-form').addEventListener('submit', (event) => { event.preventDefault(); generate(); });
 $('theme').addEventListener('change', updateActions);
 $('edition').addEventListener('change', () => loadEdition($('edition').value));
-$('retry').addEventListener('click', () => loadEdition($('edition').value, pendingRestore));
+$('retry').addEventListener('click', () => loadEdition(pendingRestore?.state.edition || $('edition').value, pendingRestore));
+$('story-picker').addEventListener('change', () => openStory($('story-picker').value));
+$('new-story').addEventListener('click', newStory);
+$('save-story').addEventListener('click', () => {
+  clearError();
+  if (persistStory()) { markChanged(); status(`“${storyTitle}” saved.`); }
+  else showError(new Error(storySaveMessage));
+});
+$('copy-story').addEventListener('click', () => {
+  clearError();
+  if (persistStory(true)) { markChanged(); status(`“${storyTitle}” saved as a separate story.`); }
+  else showError(new Error(storySaveMessage));
+});
+$('story-title').addEventListener('input', () => {
+  storyTitle = $('story-title').value;
+  markChanged();
+  persistStory();
+});
+$('story-title').addEventListener('blur', renderLibrary);
 $('clear-names').addEventListener('click', clearNames);
 for (const key of ['a', 'b']) $('name-' + key).addEventListener('input', () => {
   updateName(key, $('name-' + key).value);
@@ -435,14 +555,14 @@ $('more-results').addEventListener('click', () => {
   renderSearch(false);
   $('search-results').children[firstNew]?.querySelector('button')?.focus({preventScroll: true});
 });
-$('copy-outline').addEventListener('click', () => copy(outlineText(outline, book), 'Outline copied.'));
+$('copy-outline').addEventListener('click', () => copy(outlineText(outline, book, storyTitle), 'Outline copied.'));
 $('copy-link').addEventListener('click', () => {
   const url = new URL(location.href);
-  url.hash = `outline=${encodeURIComponent(JSON.stringify(sharedState(outline, book)))}`;
+  url.hash = `outline=${encodeURIComponent(JSON.stringify({...sharedState(outline, book), title: storyTitle}))}`;
   copy(url.href, 'Link copied. It restores this outline, its edition, and your character names.');
 });
 $('download-outline').addEventListener('click', () => {
-  const url = URL.createObjectURL(new Blob([outlineText(outline, book)], {type: 'text/plain;charset=utf-8'}));
+  const url = URL.createObjectURL(new Blob([outlineText(outline, book, storyTitle)], {type: 'text/plain;charset=utf-8'}));
   const link = element('a');
   link.href = url;
   link.download = `plotto-${outline.state.main}.txt`;
@@ -462,8 +582,9 @@ try {
 } catch (error) {
   sharedError = new Error(`The shared outline could not be opened. ${error.message}`);
 }
-const savedStory = restore ? null : loadCurrentStory();
-if (savedStory?.snapshot) restore = {...savedStory.snapshot, kind: 'saved'};
+const savedStories = loadStoryLibrary();
+const lastStory = savedStories.library.stories.find((story) => story.id === savedStories.library.activeId);
+if (!restore && lastStory) restore = {...lastStory, kind: 'library'};
 await loadEdition(restore?.state.edition || 'mf', restore);
-if (savedStory?.invalid && outline) status('The saved story could not be read. A new outline is shown, using your saved character names.');
+if (savedStories.invalid && outline) status('Saved stories could not be read. Your draft is open; copy a link to keep this work. The stored library has not been replaced.');
 if (sharedError) showError(sharedError);
