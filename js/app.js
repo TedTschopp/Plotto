@@ -226,6 +226,7 @@ function clearNames() {
 function renderSupportingCast(characters) {
   const supporting = characters.filter(({symbol}) => symbol !== 'A' && symbol !== 'B');
   $('supporting-cast').hidden = supporting.length === 0;
+  $('cast-link').hidden = supporting.length === 0;
   const fields = $('supporting-name-fields');
   fields.replaceChildren();
   for (const {symbol, description} of supporting) {

@@ -76,6 +76,24 @@ try {
   await rival().fill('');
   assert.match(await main().innerText(), /A-3/);
   await rival().fill(name);
+  await page.locator('#edition').selectOption('mf');
+  await page.waitForFunction(() => document.querySelector('.main-stage .story-ref')?.getAttribute('href').startsWith('plotto-mf'));
+  await generate('813');
+  await page.getByRole('link', {name: 'Name supporting characters'}).click();
+  const son = page.getByLabel('Name for SN (optional)', {exact: true});
+  assert.equal(await son.isVisible(), true);
+  assert.equal(await page.locator('#role-SN').innerText(), 'son');
+  await son.focus();
+  await page.locator('#supporting-cast').screenshot({path: 'test-results/conflict-813-SN.png'});
+  await son.fill('Alex');
+  assert.match(await main().innerText(), /son, Alex,/);
+  await page.reload({waitUntil: 'domcontentloaded'});
+  await ready();
+  assert.equal(await page.getByLabel('Name for SN (optional)', {exact: true}).inputValue(), 'Alex');
+  await page.locator('#edition').selectOption('fm');
+  await page.getByLabel('Name for D (optional)', {exact: true}).waitFor();
+  assert.equal(await page.locator('#role-D').innerText(), 'daughter');
+  await page.locator('summary').filter({hasText: 'Names & a starting conflict'}).click();
   await generate('269');
   assert.equal(await rival().inputValue(), name);
   // Capture the new fields in both responsive layouts.
@@ -91,7 +109,7 @@ try {
   // A dataset failure must also disable the new name fields.
   await page.evaluate((keys) => keys.forEach((key) => localStorage.removeItem(key)), [CURRENT_STORY_KEY, STORY_LIBRARY_KEY]);
   const recovery = await context.newPage();
-  await recovery.route('**/data/plotto-fm.json', (route) => route.fulfill({status: 503, body: 'unavailable'}));
+  await recovery.route('**/data/plotto-fm.json*', (route) => route.fulfill({status: 503, body: 'unavailable'}));
   await recovery.goto(base, {waitUntil: 'domcontentloaded'});
   await ready(recovery);
   await recovery.locator('summary').filter({hasText: 'Names & a starting conflict'}).click();

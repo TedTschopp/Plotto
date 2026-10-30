@@ -47,7 +47,7 @@ jobs:
       - name: Test generator rules
         run: node --test tests/*.test.js
       - name: Check generated files are committed
-        run: git diff --exit-code -- plotto-mf.html plotto-fm.html corrections.html data
+        run: git diff --exit-code -- plotto-mf.html plotto-fm.html corrections.html data index.html assets/app
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Build with Jekyll

@@ -7,6 +7,7 @@ from pathlib import Path
 
 from model import export_data
 from corrections import build_corrections
+from app_assets import build_app_assets
 
 SCRIPTS = Path(__file__).resolve().parent
 
@@ -17,6 +18,7 @@ def main():
                         str(SCRIPTS / f'config-{edition}.txt')], check=True)
     export_data()
     build_corrections()
+    build_app_assets()
 
 
 if __name__ == '__main__':

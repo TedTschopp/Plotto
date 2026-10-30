@@ -152,6 +152,19 @@ test('supporting names survive regeneration, edition changes and share round-tri
   assert.deepEqual(renderOutline(books[0], legacy).state, legacy);
 });
 
+test('conflict 813 offers the bare son/daughter symbol after all source adaptations', () => {
+  for (const book of books) {
+    const symbol = book.edition === 'mf' ? 'SN' : 'D';
+    for (let seed = 0; seed < 12; seed++) {
+      const outline = generateOutline(book, {main: '813', names: {a: 'Ada', b: '', [symbol]: 'Alex'}}, seededRandom(seed));
+      assert.ok(outlineCharacters(outline, book).some((entry) => entry.symbol === symbol));
+      assert.match(namedText(outline.main.text, outline.state.names), /Alex/);
+      assert.equal(sharedState(outline, book).names[symbol], 'Alex');
+      assert.equal(renderOutline(book, outline.state).state.names[symbol], 'Alex');
+    }
+  }
+});
+
 test('exports name added-character notes but preserve source instructions and editorial evidence', () => {
   const book = books[0];
   const outline = generateOutline(book, {main: '75a', names: {a: 'Ada', b: 'Ben', CH: 'Eli', 'A-3': 'Rowan'}}, seededRandom(12));

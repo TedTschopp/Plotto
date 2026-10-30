@@ -144,14 +144,14 @@ try {
   assert.equal((await active(page)).title, 'Still open, unsaved');
   // Failed edition loading during a switch rolls back to the open story.
   const recovery = await context.newPage();
-  await recovery.route('**/data/plotto-fm.json', (route) => route.fulfill({status: 503, body: 'unavailable'}));
+  await recovery.route('**/data/plotto-fm.json*', (route) => route.fulfill({status: 503, body: 'unavailable'}));
   await recovery.goto(base, {waitUntil: 'domcontentloaded'});
   await ready(recovery);
   await recovery.locator('#story-picker').selectOption(secondId);
   await recovery.locator('#retry:visible').waitFor();
   assert.equal(await recovery.locator('#story-picker').inputValue(), firstId);
   assert.equal(await outline(recovery), editedFirstText);
-  await recovery.unroute('**/data/plotto-fm.json');
+  await recovery.unroute('**/data/plotto-fm.json*');
   await recovery.locator('#retry').click();
   await ready(recovery);
   assert.equal(await recovery.locator('#story-picker').inputValue(), secondId);
