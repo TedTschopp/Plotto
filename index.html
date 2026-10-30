@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Build a story outline from William Wallace Cook’s Plotto: 1,462 linked conflicts, a new lead-up, and what happens next.">
   <title>Plotto · A beginning for your next story</title>
-  <script src="assets/app/tedt-theme-init.f50d7c8dbe5b3af7.js"></script>
+  <script src="assets/app/tedt-theme-init.6c41355ef6bec23b.js"></script>
   <link rel="stylesheet" href="css/tedt-header-embed.css">
-  <link rel="stylesheet" href="assets/app/app.f50d7c8dbe5b3af7.css">
+  <link rel="stylesheet" href="assets/app/app.6c41355ef6bec23b.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cal+Sans&family=Inter:wght@400;500;600;700&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-  <script type="module" src="assets/app/app.f50d7c8dbe5b3af7.js"></script>
+  <script type="module" src="assets/app/app.6c41355ef6bec23b.js"></script>
 </head>
 <body>
   <a class="skip-link" href="#workbench">Skip to the plot generator</a>
@@ -63,18 +63,22 @@
           <details class="fine-tune">
             <summary>Shape the masterplot</summary>
             <label for="protagonist">Protagonist · A clause</label>
-            <select id="protagonist" name="protagonist"><option value="">Surprise me</option></select>
+            <select id="protagonist" name="protagonist"><option value="">Any person (neutral)</option></select>
             <label for="action">Story action · B clause</label>
             <select id="action" name="action"><option value="">Any action</option></select>
             <label for="ending">Outcome · C clause</label>
-            <select id="ending" name="ending"><option value="">Surprise me</option></select>
+            <select id="ending" name="ending"><option value="">Follow the linked ending</option></select>
           </details>
-          <details class="fine-tune">
+          <details class="fine-tune" id="character-names">
             <summary>Names &amp; a starting conflict</summary>
             <label for="name-a">Name for A <span class="optional">(optional)</span></label>
             <input id="name-a" name="name-a" maxlength="60" autocomplete="off" placeholder="Keep A, or give A a name">
             <label for="name-b">Name for B <span class="optional">(optional)</span></label>
             <input id="name-b" name="name-b" maxlength="60" autocomplete="off" placeholder="Keep B, or give B a name">
+            <section id="supporting-cast" class="cast-names" aria-labelledby="cast-title" hidden>
+              <h3 id="cast-title">Other characters in this outline</h3>
+              <div id="supporting-name-fields" class="cast-name-grid"></div>
+            </section>
             <p id="name-memory-note" class="help">Character names are saved automatically in this browser for your next visit.</p>
             <button id="clear-names" class="clear-names" type="button" disabled>Clear saved names</button>
             <label for="start-conflict">Start from conflict <span class="optional">(optional)</span></label>
@@ -87,13 +91,8 @@
       <section class="outline" id="outline" aria-labelledby="outline-title" aria-busy="true">
         <div class="outline-heading"><div><p class="eyebrow">Follow the thread</p><h2 id="outline-title">Your story outline</h2></div><span id="outline-kind" class="quiet-label"></span></div>
         <p id="story-memory-note" class="help story-memory-note" hidden></p>
-        <a id="cast-link" class="cast-link" href="#supporting-cast" hidden>Name supporting characters ↓</a>
+        <a id="cast-link" class="cast-link" href="#character-names" hidden>Name characters ↑</a>
         <div id="outline-content"><p class="muted">The collection is loading. Your first outline will appear here.</p></div>
-        <section id="supporting-cast" class="cast-names" aria-labelledby="cast-title" hidden>
-          <h3 id="cast-title">Name the supporting cast</h3>
-          <p class="help">These symbols appear in your outline. Add optional names or leave the symbols as written. Names stay with their symbols when you try another suggestion.</p>
-          <div id="supporting-name-fields" class="cast-name-grid"></div>
-        </section>
         <div id="export-tools" class="export-tools" hidden>
           <button id="copy-outline" type="button">Copy outline</button>
           <button id="download-outline" type="button">Download text</button>

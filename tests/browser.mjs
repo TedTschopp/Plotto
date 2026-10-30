@@ -37,10 +37,10 @@ try {
   assert.match(await main().innerText(), /^Márta/);
   assert.match(await main().innerText(), /Sam/);
   const fixedMain = await main().innerText();
-  const master = await page.locator('.masterplot').innerText();
+  const protagonist = await page.locator('.masterplot .clause-letter').first().textContent();
   await page.locator('#before-reroll').click();
   assert.equal(await main().innerText(), fixedMain);
-  assert.equal(await page.locator('.masterplot').innerText(), master);
+  assert.equal(await page.locator('.masterplot .clause-letter').first().textContent(), protagonist);
   await page.locator('#after-reroll').click();
   assert.equal(await main().innerText(), fixedMain);
   await page.locator('#edition').selectOption('fm');

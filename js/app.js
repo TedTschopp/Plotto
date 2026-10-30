@@ -1,5 +1,6 @@
 import {generateOutline, renderOutline, cleanText, namedText, namedNote, outlineText,
-  outlineCharacters, characterRole, nameKey, sharedState, MAX_SHARED_HASH_LENGTH} from './engine.js';
+  outlineCharacters, characterRole, nameKey, sharedState, MAX_SHARED_HASH_LENGTH,
+  automaticOutcome, masterplotText, masterplotConnection} from './engine.js';
 import {loadCharacterNames, saveCharacterNames} from './name-storage.js';
 import {loadStoryLibrary, saveLibraryStory, activateLibraryStory, MAX_STORY_TITLE} from './story-library.js';
 
@@ -131,6 +132,10 @@ function changeStage(direction, group) {
     const state = structuredClone(outline.state);
     state[direction] = {seed: newSeed(), group};
     outline = renderOutline(book, state);
+    if (!$('ending').value) {
+      outline.state.c = automaticOutcome(outline, book);
+      outline = renderOutline(book, outline.state);
+    }
     markChanged();
     render();
     status(`${direction === 'before' ? 'Lead-up' : 'Carry-on'} updated. The main conflict stays the same.`);
@@ -150,7 +155,7 @@ function stage(title, direction, entries) {
   if (direction === 'main') {
     reroll.addEventListener('click', () => {
       $('start-conflict').value = '';
-      generate({a: outline.state.a, c: outline.state.c});
+      generate();
       $('main-reroll')?.focus({preventScroll: true});
     });
   } else {
@@ -254,13 +259,17 @@ function render({updateCast = true, persist = true} = {}) {
   content.replaceChildren();
   const master = element('div', undefined, 'masterplot');
   master.append(element('p', 'The masterplot · a direction for your story'));
+  master.append(element('p', masterplotText(outline), 'masterplot-sentence'));
+  const parts = element('details', undefined, 'masterplot-parts');
+  parts.append(element('summary', 'Protagonist, action and outcome'));
   const clauses = element('ol');
   for (const [letter, clause] of [['A', outline.a], ['B', outline.b], ['C', outline.c]]) {
     const line = element('li');
-    line.append(element('span', letter, 'clause-letter'), element('span', clause.text));
+    line.append(element('span', `${letter}${clause.id}`, 'clause-letter'), element('span', clause.text));
     clauses.append(line);
   }
-  master.append(clauses);
+  parts.append(clauses);
+  master.append(parts, element('p', masterplotConnection(outline, book), 'masterplot-connection'));
   content.append(master, stage('Lead-up', 'before', outline.before.entries),
     stage('Main conflict', 'main', [outline.main]), stage('Carry-on', 'after', outline.after.entries));
   $('outline-kind').textContent = outline.conflict.group;
@@ -312,7 +321,7 @@ function newSeed() {
 function updateActions() {
   const selected = $('action').value;
   const group = $('theme').value;
-  const available = new Set(book.conflicts.filter((c) => !group || c.group === group).map((c) => c.bClause));
+  const available = new Set([62, ...book.conflicts.filter((c) => !group || c.group === group).map((c) => c.bClause)]);
   $('action').replaceChildren(new Option('Any action', ''));
   book.clauses.b.filter((clause) => available.has(clause.id)).forEach((clause) => {
     $('action').append(new Option(`${clause.id}. ${clause.text}`, clause.id));
@@ -323,7 +332,7 @@ function updateActions() {
 function populateControls() {
   for (const [id, key] of [['protagonist', 'a'], ['ending', 'c']]) {
     const selected = $(id).value;
-    $(id).replaceChildren(new Option('Surprise me', ''));
+    $(id).replaceChildren(new Option(id === 'protagonist' ? 'Any person (neutral)' : 'Follow the linked ending', ''));
     book.clauses[key].forEach((clause) => $(id).append(new Option(clause.text, clause.id)));
     $(id).value = selected;
   }
@@ -544,6 +553,12 @@ $('story-title').addEventListener('input', () => {
 });
 $('story-title').addEventListener('blur', renderLibrary);
 $('clear-names').addEventListener('click', clearNames);
+$('cast-link').addEventListener('click', (event) => {
+  event.preventDefault();
+  $('character-names').open = true;
+  $('character-names').scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'});
+  $('name-a').focus({preventScroll: true});
+});
 for (const key of ['a', 'b']) $('name-' + key).addEventListener('input', () => {
   updateName(key, $('name-' + key).value);
 });

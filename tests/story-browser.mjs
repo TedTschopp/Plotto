@@ -110,6 +110,7 @@ try {
   assert.equal(await sharedPage.locator('#name-a').inputValue(), 'Guest');
   assert.deepEqual(await saved(sharedPage), nextStory.stored);
   assert.match(await sharedPage.locator('#story-memory-note').innerText(), /separate draft/);
+  await openOptions(sharedPage);
   await sharedPage.locator('#name-A-3').fill('New rival');
   const editedShared = await snapshot(sharedPage);
   assert.equal(editedShared.stored.state.main, '75a');
