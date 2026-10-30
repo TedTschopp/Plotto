@@ -4,7 +4,7 @@ import {mkdir, mkdtemp, readFile, rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {generateOutline, seededRandom} from '../js/engine.js';
-import {CURRENT_STORY_KEY} from '../js/story-storage.js';
+import {STORY_LIBRARY_KEY} from '../js/story-library.js';
 const {chromium} = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const base = process.env.PLOTTO_URL || 'http://127.0.0.1:8765';
 const profile = await mkdtemp(join(tmpdir(), 'plotto-story-'));
@@ -23,7 +23,11 @@ const openOptions = async (p) => {
   const summary = p.locator('summary').filter({hasText: 'Names & a starting conflict'});
   if (!await summary.evaluate((node) => node.parentElement.open)) await summary.click();
 };
-const saved = (p) => p.evaluate((key) => JSON.parse(localStorage.getItem(key)), CURRENT_STORY_KEY);
+const saved = (p) => p.evaluate((key) => {
+  const library = JSON.parse(localStorage.getItem(key));
+  const story = library.stories.find((entry) => entry.id === library.activeId);
+  return {version: 1, state: story.state, controls: story.controls};
+}, STORY_LIBRARY_KEY);
 const snapshot = async (p) => ({text: await p.locator('#outline-content').innerText(),
   controls: await p.locator('#generator-fields').evaluate((fields) => Object.fromEntries(
     ['edition', 'theme', 'action', 'protagonist', 'ending', 'start-conflict', 'name-a', 'name-b']
@@ -105,7 +109,7 @@ try {
   await ready(sharedPage);
   assert.equal(await sharedPage.locator('#name-a').inputValue(), 'Guest');
   assert.deepEqual(await saved(sharedPage), nextStory.stored);
-  assert.match(await sharedPage.locator('#story-memory-note').innerText(), /when you make a change/);
+  assert.match(await sharedPage.locator('#story-memory-note').innerText(), /separate draft/);
   await sharedPage.locator('#name-A-3').fill('New rival');
   const editedShared = await snapshot(sharedPage);
   assert.equal(editedShared.stored.state.main, '75a');
@@ -123,16 +127,19 @@ try {
   assert.equal(await page.locator('#name-A-3').inputValue(), '');
   await openOptions(page);
   await page.locator('#name-a').fill('Kept name');
-  await page.evaluate((key) => localStorage.setItem(key, '{broken'), CURRENT_STORY_KEY);
+  const beforeCorruption = await page.evaluate((key) => localStorage.getItem(key), STORY_LIBRARY_KEY);
+  await page.evaluate((key) => localStorage.setItem(key, '{broken'), STORY_LIBRARY_KEY);
   await page.reload({waitUntil: 'domcontentloaded'});
   await ready(page);
-  assert.match(await page.locator('#status').innerText(), /saved story could not be read/);
+  assert.match(await page.locator('#status').innerText(), /Saved stories could not be read/);
   assert.equal(await page.locator('#name-a').inputValue(), 'Kept name');
+  assert.equal(await page.evaluate((key) => localStorage.getItem(key), STORY_LIBRARY_KEY), '{broken');
+  await page.evaluate(({key, value}) => localStorage.setItem(key, value), {key: STORY_LIBRARY_KEY, value: beforeCorruption});
   await page.evaluate((key) => {
     const stored = JSON.parse(localStorage.getItem(key));
-    stored.state.hash = 'older-source';
+    stored.stories.find((entry) => entry.id === stored.activeId).state.hash = 'older-source';
     localStorage.setItem(key, JSON.stringify(stored));
-  }, CURRENT_STORY_KEY);
+  }, STORY_LIBRARY_KEY);
   await page.reload({waitUntil: 'domcontentloaded'});
   await ready(page);
   assert.match(await page.locator('#status').innerText(), /saved story could not be restored/);
@@ -147,7 +154,7 @@ try {
       if (name === key) throw new DOMException('Full', 'QuotaExceededError');
       return original.call(this, name, value);
     };
-  }, CURRENT_STORY_KEY);
+  }, STORY_LIBRARY_KEY);
   await full.goto(base, {waitUntil: 'domcontentloaded'});
   await ready(full);
   await openOptions(full);

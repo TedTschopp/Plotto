@@ -3,6 +3,7 @@
 import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
 import {CURRENT_STORY_KEY} from '../js/story-storage.js';
+import {STORY_LIBRARY_KEY} from '../js/story-library.js';
 const {chromium} = await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const base = process.env.PLOTTO_URL || 'http://127.0.0.1:8765';
 const browser = await chromium.launch({headless: true});
@@ -140,7 +141,7 @@ try {
   await ready();
   assert.match(await page.locator('#error').innerText(), /shared outline could not be opened/);
   // A dataset failure has a usable recovery control and keeps export unavailable.
-  await page.evaluate((key) => localStorage.removeItem(key), CURRENT_STORY_KEY);
+  await page.evaluate((keys) => keys.forEach((key) => localStorage.removeItem(key)), [CURRENT_STORY_KEY, STORY_LIBRARY_KEY]);
   const recovery = await context.newPage();
   await recovery.route('**/data/plotto-mf.json', (route) => route.fulfill({status: 503, body: 'unavailable'}));
   await recovery.goto(base, {waitUntil: 'domcontentloaded'});
