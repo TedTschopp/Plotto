@@ -73,11 +73,11 @@ try {
   assert.equal(await page.locator('#name-A-3').inputValue(), 'Rówan');
   // A failed dataset request and retry must preserve the saved story.
   const recovery = await context.newPage();
-  await recovery.route('**/data/plotto-fm.json', (route) => route.fulfill({status: 503, body: 'unavailable'}));
+  await recovery.route('**/data/plotto-fm.json*', (route) => route.fulfill({status: 503, body: 'unavailable'}));
   await recovery.goto(base, {waitUntil: 'domcontentloaded'});
   await recovery.locator('#retry:visible').waitFor();
   assert.deepEqual(await saved(recovery), expected.stored);
-  await recovery.unroute('**/data/plotto-fm.json');
+  await recovery.unroute('**/data/plotto-fm.json*');
   await recovery.locator('#retry').click();
   await ready(recovery);
   assert.deepEqual(await snapshot(recovery), expected);

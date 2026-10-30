@@ -37,7 +37,7 @@ python3 -m http.server 8765 --bind 127.0.0.1
 
 Open [the local preview](http://127.0.0.1:8765/). Use HTTP because the generator fetches its dataset. The linked book editions also work without JavaScript. `npm run build`, `npm test`, `npm run verify`, and `npm run dev` are shortcuts for the corresponding commands.
 
-For optional browser checks, install Playwright separately and run `node tests/browser.mjs`, `node tests/cast-browser.mjs`, `node tests/names-browser.mjs`, `node tests/story-browser.mjs`, and `node tests/library-browser.mjs` against the local server. The persistence and library checks use temporary browser profiles and verify persistence after a full browser restart. `PLAYWRIGHT_MODULE` can point to an existing Playwright module; `PLOTTO_URL` selects another server. Browser screenshots go into the ignored `test-results/` directory.
+For optional browser checks, install Playwright separately and run `node tests/browser.mjs`, `node tests/cast-browser.mjs`, `node tests/names-browser.mjs`, `node tests/story-browser.mjs`, and `node tests/library-browser.mjs` against the local server. `node tests/cache-upgrade-browser.mjs` starts an isolated fixture server to verify upgrading with old scripts and data already cached. The persistence and library checks use temporary browser profiles and verify persistence after a full browser restart. `PLAYWRIGHT_MODULE` can point to an existing Playwright module; `PLOTTO_URL` selects another server. Browser screenshots go into the ignored `test-results/` directory.
 
 ## Source and build
 
@@ -55,11 +55,12 @@ For optional browser checks, install Playwright separately and run `node tests/b
 | `js/story-storage.js` | Legacy saved-story reader and generator-settings normalization for library migration. |
 | `js/story-library.js` | Titled story library, migration, independent saves, and protection against stale-tab overwrites. |
 | `index.html`, `css/app.css` | Generator interface, responsive layout, light/dark appearance and print styles. |
+| `scripts/app_assets.py`, `assets/app/` | Generated app modules and styles with matching fingerprints; older versions remain available to cached pages. |
 | `plotto-mf.html`, `plotto-fm.html` | Generated readers. Native contents and edition links work without JavaScript. |
 | `how-to.html` | Illustrated guide to the app and original method. |
 | `scripts/corrections.py`, `corrections.html` | Generated correction history, scan evidence, and explicit editorial decisions. |
 
-Run the build after editing the source or renderer, then commit the updated HTML and JSON. Verification compares every rendered variant against its source and checks that datasets are current. The engine tests exercise all 1,852 variants in each edition, in addition to focused checks of the book’s reference rules.
+Run the build after editing application JavaScript, styles, the source, or the renderer, then commit the generated app assets, HTML and JSON. The generator loads one fingerprinted set of modules and styles, and a matching versioned dataset URL, so a cached older module cannot silently disable new name fields or library controls. Verification checks the generated app assets as well as source fidelity and dataset freshness. The engine tests exercise all 1,852 variants in each edition, in addition to focused checks of the book’s reference rules, including the bare SN symbol in conflict 813.
 
 The [reference correction ledger](https://plotto.tedt.org/corrections.html) records 24 repairs, with printed forms, corrected targets, scan pages, checksums for the latest audit, and reasoning. The latest audit resolves all 21 formerly unavailable subvariant references: five were transcription errors, and sixteen were already broken in print. Ten editorial repairs normalize a missing suffix to the existing unlettered conflict; six use explicitly documented contextual or numbered-example interpretations. Editorial references carry a dagger in the readers and a visible note and evidence link in generated outlines. No missing story text is invented, and the 1,852-variant inventory is unchanged. Every lead-up and carry-on now resolves to existing variants; the build fails on unknown subvariants. Section references without matching markers remain excluded from generation.
 

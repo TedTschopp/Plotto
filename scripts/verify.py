@@ -10,6 +10,7 @@ from urllib.parse import unquote, urlsplit
 
 from model import ROOT, read_book, validate_book
 from corrections import render_corrections
+from app_assets import verify_app_assets
 
 VOID = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'}
 
@@ -59,7 +60,7 @@ def normalized_text(text):
 
 
 def verify():
-    errors = []
+    errors = verify_app_assets()
     names = ['index.html', 'how-to.html', 'corrections.html', 'plotto-mf.html', 'plotto-fm.html']
     pages = {name: PageAudit((ROOT / name).read_text(encoding='utf-8')) for name in names}
     if (ROOT / 'corrections.html').read_text(encoding='utf-8') != render_corrections():

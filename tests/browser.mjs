@@ -143,14 +143,14 @@ try {
   // A dataset failure has a usable recovery control and keeps export unavailable.
   await page.evaluate((keys) => keys.forEach((key) => localStorage.removeItem(key)), [CURRENT_STORY_KEY, STORY_LIBRARY_KEY]);
   const recovery = await context.newPage();
-  await recovery.route('**/data/plotto-mf.json', (route) => route.fulfill({status: 503, body: 'unavailable'}));
+  await recovery.route('**/data/plotto-mf.json*', (route) => route.fulfill({status: 503, body: 'unavailable'}));
   await recovery.goto(base, {waitUntil: 'domcontentloaded'});
   await recovery.locator('#retry:visible').waitFor();
   assert.equal(await recovery.locator('#export-tools').isVisible(), false);
-  await recovery.unroute('**/data/plotto-mf.json');
+  await recovery.unroute('**/data/plotto-mf.json*');
   await recovery.locator('#retry').click();
   await ready(recovery);
-  await recovery.route('**/data/plotto-fm.json', (route) => route.fulfill({status: 503, body: 'unavailable'}));
+  await recovery.route('**/data/plotto-fm.json*', (route) => route.fulfill({status: 503, body: 'unavailable'}));
   await recovery.locator('#edition').selectOption('fm');
   await recovery.locator('#retry:visible').waitFor();
   assert.equal(await recovery.locator('#export-tools').isVisible(), false);
