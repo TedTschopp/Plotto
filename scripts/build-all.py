@@ -19,6 +19,7 @@ def main():
     export_data()
     build_corrections()
     build_app_assets()
+    subprocess.run([sys.executable, str(SCRIPTS / 'site_analytics.py'), str(SCRIPTS.parent), '--mode', 'masked'], check=True)
 
 
 if __name__ == '__main__':

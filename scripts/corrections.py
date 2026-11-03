@@ -1,5 +1,6 @@
 """Publish the scan audit and distinguish transcriptions from editorial repairs."""
 
+from site_analytics import transform
 import json
 import re
 from html import escape
@@ -47,7 +48,7 @@ def render_corrections():
         parts.append(' · '.join(f'<a href="{escape(item["source"], quote=True)}">Scan p. {item["page"]}</a>' for item in evidence))
         parts.append(f' · <a href="plotto-mf.html#{key}">Read conflict {key}</a> · <a href="plotto-mf.html#{target}">Read the repaired target</a></p>\n</article>\n')
     parts.append('</main><footer class="book-footer"><a href="./">Back to the plot generator</a> · William Wallace Cook, 1928</footer></body></html>\n')
-    return ''.join(parts)
+    return transform(''.join(parts), True)
 
 
 def build_corrections():

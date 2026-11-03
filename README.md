@@ -84,3 +84,7 @@ The reader build uses `scripts/templates/global-header.html`. Keep that fragment
 William Wallace Cook wrote the original book, published in 1928. The Internet Archive digitized it in 2012, and Gary Kacmarcik cleaned and annotated the digital text in 2016. This application builds on [Gary’s original project](https://github.com/garykac/plotto).
 
 The Internet Archive hosts the scans used by this project. Consider [supporting its work](https://archive.org/donate/).
+
+## Shared Visitor Analytics
+
+Published HTML uses the deferred TedT.org analytics v1 runtime for GA4, Microsoft Clarity, and Cloudflare Web Analytics. Content is masked before Clarity loads. Authentication/payment operations, API responses, and independent downloads are excluded. Run `python3 scripts/site_analytics.py _site --mode masked --check` on the final publication directory. Configuration and the integration contract are maintained at https://github.com/TedTschopp/tedt.org/blob/main/docs/analytics.md.
